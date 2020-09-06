@@ -1,0 +1,30 @@
+### Uebersicht
+{{baseUrl}}
+Authorization: {{basic-auth}}
+
+### Health
+{{baseUrl}}/health
+Authorization: {{basic-auth}}
+
+### Health
+{{baseUrl}}/mappings
+Authorization: {{basic-auth}}
+
+### Info
+{{baseUrl}}/info
+Authorization: {{basic-auth}}
+
+#### Spring Beans
+#{{baseUrl}}/beans
+#Authorization: {{basic-auth}}
+
+### Shutdown
+POST {{baseUrl}}/shutdown
+Authorization: {{basic-auth}}
+Content-Type: application/json
+
+### Beispiel 3: Abfrage ueber den Status der Instanz beim Registry-Server (401 :-(
+http://{{host}}/service-registry/instance-status
+Authorization: {{basic-auth}}
+
+###

@@ -1,0 +1,25 @@
+### Uebersicht
+GET {{baseUrl}}
+Authorization: {{basic-auth}}
+
+### Features
+GET {{baseUrl}}/features
+Authorization: {{basic-auth}}
+
+### "Health" der Dienste, wie z.B. Discovery-Client oder MongoDB-Client
+GET {{baseUrl}}/health
+Authorization: {{basic-auth}}
+
+### Spring Beans
+GET {{baseUrl}}/beans
+Authorization: {{basic-auth}}
+
+### Configuration Properties
+GET {{baseUrl}}/configprops
+Authorization: {{basic-auth}}
+
+### Umgebung und Properties
+GET {{baseUrl}}/env
+Authorization: {{basic-auth}}
+
+###

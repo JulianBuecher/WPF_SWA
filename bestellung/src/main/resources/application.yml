@@ -1,0 +1,109 @@
+# Copyright (C) 2016 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# https://github.com/sdeleuze/spring-kotlin-functional/blob/boot/src/main/resources/application.properties
+context.initializer.classes: com.acme.bestellung.BeansInitializer
+
+server:
+  #port: 8080
+  compression:
+    enabled: true
+    mime-types: application/hal+json
+    min-response-size: 2KB
+  error.whitelabel.enabled: false
+  shutdown: graceful
+
+spring:
+  application.name: bestellung
+  aop.proxy-target-class: false
+  data.mongodb:
+    authentication-database: admin
+    auto-index-creation: false
+    repositories.type: none
+    database: acme
+    host: localhost
+    #password: ...
+    username: admin
+    uuid-representation: standard
+  jackson.default-property-inclusion: non_null
+  lifecycle.timeout-per-shutdown-phase: 3s
+  main.lazy-initialization: true
+  output.ansi.enabled: ALWAYS
+  security.user.password: p
+  spel.ignore: true
+  thymeleaf.enabled: true
+  xml.ignore: true
+
+info.app:
+  author: Juergen Zimmermann
+  lecture: Softwarearchitektur
+  semester: 3
+  studiengang: Wirtschaftsinformatik (Bachelor)
+
+logging:
+  file.name: build/logs/application.log
+  level:
+    org:
+      hibernate.validator.internal.xml:
+        ValidationXmlParser: WARN
+        ValidationBootstrapParameters: WARN
+      mongodb.driver.cluster: WARN
+      springframework:
+        boot.devtools.autoconfigure.ConditionEvaluationDeltaLoggingListener: WARN
+        security.core:
+          userdetails.User: ERROR
+          #SpringSecurityCoreVersion: ERROR
+
+management:
+  endpoints.web.exposure.include: "*"
+  endpoint:
+    health.enabled: true
+    shutdown.enabled: true
+
+---
+spring:
+  config.activate.on-profile: dev
+  devtools:
+    livereload.enabled: false
+    restart.trigger-file: /restart.txt
+  jackson.serialization.indent-output: true
+  reactor.debugagent.enabled: true
+  thymeleaf.cache: false
+
+logging.level:
+  com.acme: TRACE
+  io.mockk.impl.recording.states.AnsweringState: DEBUG
+  org:
+    junit.jupiter.engine.descriptor.TestInstanceLifecycleUtils: WARN
+    springframework:
+      http.codec.json.Jackson2JsonEncoder: DEBUG
+      web.server.adapter.HttpWebHandlerAdapter: DEBUG
+      boot.test.context.SpringBootTestContextBootstrapper: WARN
+      test.context.support:
+        AbstractContextLoader: WARN
+        AnnotationConfigContextLoaderUtils: WARN
+        DefaultTestContextBootstrapper: WARN
+  #reactor.netty.http.client: DEBUG
+
+management:
+  endpoint:
+    env.enabled: true
+    health.show-details: ALWAYS
+    mappings.enabled: true
+  endpoints.web.cors:
+    allowed-origins: http://localhost,http://127.0.0.1,https://localhost,https://127.0.0.1
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: Origin,Content-Type,Accept,Authorization,Access-Control-Allow-Origin,Access-Control-Allow-Methods,Access-Control-Allow-Headers,Access-Control-Expose-Headers,Allow,Content-Length,Date,If-None-Match,If-Match,Last-Modified,If-Modified-Since
+    exposed-headers: Location,ETag,Access-Control-Allow-Origin,Access-Control-Allow-Headers

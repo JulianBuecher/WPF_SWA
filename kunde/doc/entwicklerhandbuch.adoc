@@ -1,0 +1,116 @@
+// Copyright (C) 2019 - present Juergen Zimmermann, Hochschule Karlsruhe
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+= Entwicklerhandbuch
+Jürgen Zimmermann <Juergen.Zimmermann@HS-Karlsruhe.de>
+:doctype: book
+:toc: left
+:sectanchors:
+:sectlinks:
+:sectnums:
+:source-highlighter: coderay
+:icons: font
+
+// https://github.com/asciidoctor/asciidoctorj
+// https://github.com/asciidoctor/asciidoctor-diagram
+// http://de.plantuml.com/classes.html
+// http://de.plantuml.com/component.html
+// https://github.com/odrotbohm/asciidoctor-plantuml
+
+IMPORTANT: Copyright (C) 2015 - present Jürgen Zimmermann, Hochschule Karlsruhe. +
+           Free use of this software is granted under the terms of the
+           GNU General Public License (GPL) v3. +
+           For the full text of the license, see the http://www.gnu.org/licenses/gpl-3.0.html[license] file.
+
+== Der Microservice Kunde
+
+=== Der Microservice im Überblick
+
+bla bla
+
+.Use Cases für den Microservice "kunde"
+[plantuml,use-cases,svg]
+----
+include::./use-cases.puml[]
+----
+
+bla bla
+
+.Komponenten des Microservice "kunde"
+[plantuml,komponenten,svg]
+----
+include::./komponenten.puml[]
+----
+
+=== Die REST-Schnittstelle
+
+bla bla
+
+.Die Handler-Klasse "KundeHandler" innerhalb der REST-Schnittstelle
+[plantuml,KundeHandler,svg]
+----
+include::./KundeHandler.puml[]
+----
+
+=== Der Anwendungskern
+
+bla bla
+
+.Die Service-Klasse "KundeService" im Anwendungskern
+[plantuml,KundeService,svg]
+----
+include::./KundeService.puml[]
+----
+
+=== Die Entity-Klassen
+
+bla bla
+
+.Die Entity-Klasse "Kunde" für Kundendaten
+[plantuml,Kunde,svg]
+----
+include::./Kunde.puml[]
+----
+
+== Programmierrichtlinien
+
+TIP: Als Studierende/r sollte man sich frühzeitig an Programmierrichtlinien
+     gewöhnen. Das hinterlässt im späteren Praxissemester einen professionellen Eindruck.
+
+=== Kotlin
+
+Für die Entwicklung mit *Kotlin* sind folgende Styleguides empfehlenswert:
+
+[horizontal]
+_Kotlin_:: https://kotlinlang.org/docs/reference/coding-conventions.html
+_Android_:: https://developer.android.com/kotlin/style-guide
+
+=== Java
+
+[horizontal]
+_Google_:: https://google.github.io/styleguide/javaguide.html
+_Microsoft Azure_:: https://azure.github.io/azure-sdk/java_introduction.html
+_Mozilla_:: https://firefox-source-docs.mozilla.org/code-quality/coding-style/coding_style_java.html
+
+=== TypeScript und JavaScript
+
+[horizontal]
+_Microsoft_:: https://github.com/Microsoft/TypeScript/wiki/Coding-guidelines
+_Angular_:: https://angular.io/docs/ts/latest/guide/style-guide.html
+_React_:: https://github.com/airbnb/javascript/tree/master/react
+
+=== SQL
+
+[horizontal]
+_SQL_:: https://www.sqlstyle.guide

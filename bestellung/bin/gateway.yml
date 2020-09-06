@@ -1,0 +1,53 @@
+# Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# kubectl apply --filename gateway.yml
+# C:\Zimmermann\Git\mingw64\bin\curl --silent --user admin:p http://localhost:80/bestellungen/api/10000000-0000-0000-0000-000000000001
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: acme-gateway
+  namespace: acme
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: acme-bestellung
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - acme-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /bestellungen/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: bestellung

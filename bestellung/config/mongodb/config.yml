@@ -1,0 +1,40 @@
+# https://docs.mongodb.com/manual/reference/configuration-options/#systemlog-options
+systemLog:
+  destination: file
+  path: /var/mongodb/mongod.log
+  #verbosity: 1
+  #logAppend: true
+
+# https://docs.mongodb.com/manual/reference/configuration-options/#storage-wiredtiger-options
+storage:
+  dbPath: /data/mongodb
+  wiredTiger.engineConfig.cacheSizeGB: 0.3
+  #journal:
+    #enabled: false
+
+# https://docs.mongodb.com/manual/tutorial/convert-standalone-to-replica-set
+# https://docs.mongodb.com/manual/reference/configuration-options/#replication-options
+replication:
+  # https://docs.mongodb.com/manual/core/replica-set-oplog/#replica-set-oplog-sizing
+  oplogSizeMB: 990
+  replSetName: replicaSet
+
+# https://docs.mongodb.com/manual/reference/configuration-options/#security-options
+security.authorization: enabled
+
+# https://docs.mongodb.com/manual/reference/configuration-options/#net-options
+net:
+  #bindIp: 127.0.0.1
+  #port: 27017
+  #maxIncomingConnections: 100
+  tls:
+  # https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-tlsmode
+    #mode: requireTLS
+    mode: preferTLS
+    # Client Zertifikat aus dem "system certificate store" durch "Common Name"
+    # Alternative zur Option "certificateKeyFile" (s.u.)
+    # https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-tlscertificateselector
+    #certificateSelector: subject=Juergen.Zimmermann.MongoDB
+    # https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-tlscertificatekeyfile
+    certificateKeyFile: /etc/mongodb/key.pem
+    disabledProtocols: TLS1_1

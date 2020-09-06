@@ -1,0 +1,25 @@
+### Eine neue Bestellung anlegen
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: {{basic-auth}}
+ALPN: h2
+
+< data/bestellung-neu.json
+
+### Eine leere Bestellung anlegen
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: {{basic-auth}}
+ALPN: h2
+
+< data/bestellung-neu-leer.json
+
+### Eine ungueltige Bestellung anlegen
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: {{basic-auth}}
+ALPN: h2
+
+< data/bestellung-neu-invalid.json
+
+###

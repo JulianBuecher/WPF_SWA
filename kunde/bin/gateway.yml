@@ -1,0 +1,68 @@
+# Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# kubectl apply --filename gateway.yml
+# C:\Zimmermann\Git\mingw64\bin\curl --silent --user admin:p http://localhost:80/kunden/api/00000000-0000-0000-0000-000000000001
+
+# kubectl get virtualservices --output yaml --namespace acme
+# kubectl get service istio-ingressgateway --output jsonpath='{.status.loadBalancer.ingress[0].hostname}' --namespace istio-system
+
+# Externe Freigabe des unten stehenden Service aus dem "Service Mesh"
+# https://istio.io/latest/docs/examples/microservices-istio/istio-ingress-gateway
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: acme-gateway
+  namespace: acme
+spec:
+  selector:
+    # Default-Gateway
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        # https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#accessing-ingress-services-using-a-browser
+        - "*"
+
+---
+# Service innerhalb vom "Service Mesh"
+# https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control
+# https://istio.io/latest/docs/tasks/traffic-management/request-routing
+apiVersion: networking.istio.io/v1alpha3
+# https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService
+kind: VirtualService
+metadata:
+  name: acme-kunde
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - acme-gateway
+  http:
+    # https://istio.io/latest/docs/concepts/traffic-management
+    # https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPMatchRequest
+    - match:
+        - uri:
+            prefix: /kunden/
+      rewrite:
+        uri: /
+      # https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute
+      route:
+        # https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRouteDestination
+        - destination:
+            host: kunde
