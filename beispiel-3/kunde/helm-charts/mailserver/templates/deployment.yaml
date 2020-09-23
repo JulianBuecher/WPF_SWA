@@ -1,0 +1,47 @@
+{{/*Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe*/}}
+
+{{/*This program is free software: you can redistribute it and/or modify*/}}
+{{/*it under the terms of the GNU General Public License as published by*/}}
+{{/*the Free Software Foundation, either version 3 of the License, or*/}}
+{{/*(at your option) any later version.*/}}
+
+{{/*This program is distributed in the hope that it will be useful,*/}}
+{{/*but WITHOUT ANY WARRANTY; without even the implied warranty of*/}}
+{{/*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the*/}}
+{{/*GNU General Public License for more details.*/}}
+
+{{/*You should have received a copy of the GNU General Public License*/}}
+{{/*along with this program.  If not, see <http://www.gnu.org/licenses/>.*/}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    version: {{ .Values.image.tag }}
+    tier: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      version: {{ .Values.image.tag }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        version: {{ .Values.image.tag }}
+    spec:
+      containers:
+        {{/* - image: gessnerfl/fake-smtp-server:{{ .Values.image.tag }} */}}
+        - image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+          name: {{ .Release.Name }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-env-dev
+          ports:
+            - containerPort: 5025
+            - containerPort: 5080
+            - containerPort: 5081
+

@@ -1,0 +1,91 @@
+' Copyright (C) 2019 - present Juergen Zimmermann, Hochschule Karlsruhe
+'
+' This program is free software: you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation, either version 3 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program.  If not, see <http://www.gnu.org/licenses/>.
+@startuml KundeService
+
+!pragma useNewPackage
+skinparam classAttributeIconSize 0
+skinparam componentStyle uml2
+
+interface kotlinx.coroutines.flow.Flow
+interface javax.validation.ValidatorFactory
+
+package com.mongodb.client.result {
+    abstract class DeleteResult
+}
+
+package org.springframework {
+    package data.mongodb.core {
+        interface ReactiveFluentMongoOperations {
+        }
+    }
+    package security.core {
+        interface Authentication {
+        }
+    }
+}
+
+
+package com.acme.kunde {
+    package config.security {
+        class CustomUserDetailsService << control >> {
+        }
+    }
+
+    package mail  {
+        class Mailer << control >>
+    }
+
+    package entity {
+        class Kunde << entity >> {
+        }
+
+        class KundeId << typealias >> {
+        }
+    }
+
+    package service #DDDDDD {
+        KundeService o--> "1" CustomUserDetailsService : userService
+        KundeService o--> "1" ReactiveFluentMongoOperations : mongo
+        KundeService o--> "1" Mailer : mailer
+        KundeService o-right-> "1" javax.validation.ValidatorFactory : validatorFactory
+        KundeService .up.> Kunde
+        KundeService .up.> KundeId
+        KundeService .right.> kotlinx.coroutines.flow.Flow
+        KundeService ..> Authentication
+        KundeService .up.> FindByIdResult
+        KundeService .up.> CreateResult
+        KundeService .up.> UpdateResult
+        KundeService .up.> DeleteResult
+
+        class KundeService << control >> << @Service >> {
+            + suspend findById(id: KundeId): FindByIdResult
+            + find(queryParams: MultiValueMap<String, String>): Flow<Kunde>
+            + @Transactional suspend create(kunde: Kunde): CreateResult
+            + suspend update(kunde: Kunde, id: KundeId, version: String): UpdateResult
+            + suspend deleteById(id: KundeId): DeleteResult
+            + suspend deleteByEmail(email: String): DeleteResult
+        }
+
+        class FindByIdResult {}
+        class CreateResult {}
+        class UpdateResult {}
+    }
+}
+
+hide empty members
+
+footer (c) Jürgen Zimmermann
+
+@enduml

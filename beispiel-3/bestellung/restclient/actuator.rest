@@ -1,0 +1,18 @@
+### Liveness
+GET {{baseUrl}}/health/liveness
+
+### Readiness
+GET {{baseUrl}}/health/readiness
+
+### Health
+GET {{baseUrl}}/health
+
+### Uebersicht
+GET {{baseUrl}}
+Authorization: {{basic-auth}}
+
+### Spring Beans
+#GET {{baseUrl}}/beans
+#Authorization: {{basic-auth}}
+
+###

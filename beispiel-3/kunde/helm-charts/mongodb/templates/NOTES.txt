@@ -1,0 +1,19 @@
+Das Release {{ quote .Release.Name }} wurde mit dem Chart {{ quote .Chart.Name }} installiert.
+
+Nützliche Kommandos:
+
+  helm status {{ .Release.Name }} --namespace {{ .Values.namespace }}
+  helm get manifest {{ .Release.Name }} --namespace {{ .Values.namespace }}
+
+Passwort fuer MongoDB ueberpruefen:
+  kubectl describe secret {{ .Release.Name }}-dev --namespace {{ .Values.namespace }}
+
+  $base64 = kubectl get secret {{ .Release.Name }}-dev --output jsonpath='{.data.password}' --namespace {{ .Values.namespace }}
+  $pwd = [Convert]::FromBase64String($base64)
+  [System.Text.Encoding]::UTF8.GetString($pwd)
+
+  $podName = kubectl get pods --selector app={{ .Release.Name }} --namespace {{ .Values.namespace }} | wsl --exec awk '/^{{ .Release.Name }}-/ {print $1}'
+  kubectl exec $podName --container mongo --stdin --tty --namespace {{ .Values.namespace }} -- printenv MONGO_INITDB_ROOT_PASSWORD
+
+Port-Forwarding waehrend der Entwicklung:
+  kubectl port-forward service/mongodb {{ .Values.port }} --namespace {{ .Values.namespace }}

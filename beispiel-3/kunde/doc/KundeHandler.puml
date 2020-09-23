@@ -1,0 +1,79 @@
+' Copyright (C) 2019 - present Juergen Zimmermann, Hochschule Karlsruhe
+'
+' This program is free software: you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation, either version 3 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program.  If not, see <http://www.gnu.org/licenses/>.
+@startuml KundeHandler
+
+!pragma useNewPackage
+skinparam classAttributeIconSize 0
+skinparam componentStyle uml2
+
+' !pragma horizontalLineBetweenDifferentPackageAllowed
+
+package org.springframework {
+    package web.reactive.function.server {
+        class ServerRequest {
+        }
+        class ServerResponse {
+        }
+    }
+    package hateoas as springHateoas {
+        class EntityModel<E> {
+        }
+    }
+}
+
+package com.acme.kunde {
+    package entity {
+        class Kunde << entity >> {
+        }
+    }
+
+    package service {
+        class KundeService << control >> << @Service >> {
+        }
+    }
+
+    package rest #DDDDDD {
+        package hateoas #FFFFFF {
+            class KundeModelAssembler << @Component >> {
+            }
+        }
+        KundeHandler o-right-> "1" KundeService : service
+        KundeHandler o-down-> "1" KundeModelAssembler : modelAssembler
+        KundeHandler .down.> Kunde
+        KundeHandler .down.> ServerRequest
+        KundeHandler .down.> ServerResponse
+        KundeHandler .down.> EntityModel
+
+        ' [hidden] fuer nicht-existierende Beziehungen als Workaround fuer das Layout
+        KundeModelAssembler -[hidden]-> Kunde
+        Kunde -[hidden]-> ServerRequest
+
+        class KundeHandler << boundary >> << @Component >> {
+            + suspend findById(request: ServerRequest): ServerResponse
+            + suspend find(request: ServerRequest): ServerResponse
+            + suspend create(request: ServerRequest): ServerResponse
+            + suspend update(request: ServerRequest): ServerResponse
+            + suspend patch(request: ServerRequest): ServerResponse
+            + suspend deleteById(request: ServerRequest): ServerResponse
+            + suspend deleteByEmail(request: ServerRequest): ServerResponse
+        }
+    }
+}
+
+hide empty members
+
+footer (c) Juergen Zimmermann
+
+@enduml

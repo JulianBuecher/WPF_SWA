@@ -1,0 +1,29 @@
+### Löschen mit vorhandener Kunde-ID
+DELETE {{baseUrl}}/00000000-0000-0000-0000-000000000004
+Authorization: {{basic-auth-admin}}
+ALPN: h2
+
+### Löschen mit nicht-vorhandener Kunde-ID
+DELETE {{baseUrl}}/FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF
+Authorization: {{basic-auth-admin}}
+ALPN: h2
+
+### Löschen mit vorhandener Kunde-ID und falschem Passwort: 401 (Unauthorized)
+DELETE {{baseUrl}}/00000000-0000-0000-0000-000000000004
+Authorization: {{basic-auth-admin-falsch}}
+ALPN: h2
+
+### Löschen mit vorhandener Kunde-ID und fehlenden Rechten: 403 (Forbidden)
+DELETE {{baseUrl}}/00000000-0000-0000-0000-000000000004
+Authorization: {{basic-auth-alpha1}}
+ALPN: h2
+
+### Löschen mit vorhandener Email
+DELETE {{baseUrl}}/?email=phi%40acme.cn
+Authorization: {{basic-auth-admin}}
+ALPN: h2
+
+### Löschen mit vorhandener Email
+DELETE {{baseUrl}}/?email=does%40not.exist
+Authorization: {{basic-auth-admin}}
+ALPN: h2

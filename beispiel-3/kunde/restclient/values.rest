@@ -1,0 +1,19 @@
+### Suche Nachnamen mit Praefix
+GET {{baseUrl}}/nachname/a
+Authorization: {{basic-auth-admin}}
+ALPN: h2
+
+### Suche Emailadressen mit Praefix
+GET {{baseUrl}}/email/al
+Authorization: {{basic-auth-admin}}
+ALPN: h2
+
+### Suche Version zu Kunde-ID
+GET {{baseUrl}}/version/00000000-0000-0000-0000-000000000001
+Authorization: {{basic-auth-admin}}
+ALPN: h2
+
+### Alle Rollen ermitteln
+GET {{baseUrl}}/auth/rollen
+Authorization: {{basic-auth-admin}}
+ALPN: h2

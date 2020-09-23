@@ -1,0 +1,87 @@
+{{/*Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe*/}}
+
+{{/*This program is free software: you can redistribute it and/or modify*/}}
+{{/*it under the terms of the GNU General Public License as published by*/}}
+{{/*the Free Software Foundation, either version 3 of the License, or*/}}
+{{/*(at your option) any later version.*/}}
+
+{{/*This program is distributed in the hope that it will be useful,*/}}
+{{/*but WITHOUT ANY WARRANTY; without even the implied warranty of*/}}
+{{/*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the*/}}
+{{/*GNU General Public License for more details.*/}}
+
+{{/*You should have received a copy of the GNU General Public License*/}}
+{{/*along with this program.  If not, see <http://www.gnu.org/licenses/>.*/}}
+
+{{/* kubectl describe pod mongodb-0 --namespace acme */}}
+{{/* kubectl exec mongodb-0 --stdin --tty --namespace acme -- bash */}}
+{{/* kubectl exec mongodb-0 --stdin --tty --namespace acme -- mongodb --username admin --password p --authenticationDatabase admin acme */}}
+{{/*   hostname = mongodb-0.mongodb.acme.svc.cluster.local (siehe /etc/hosts) */}}
+{{/*   db.kunde.find()*/}}
+
+{{/* Service wird von StatefulSet referenziert */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.port }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    version: {{ .Values.image.tag }}
+    tier: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      version: {{ .Values.image.tag }}
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        version: {{ .Values.image.tag }}
+    spec:
+      containers:
+        - name: {{ .Values.image.name }}
+          image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+          args:
+            {{/* https://docs.mongodb.com/manual/reference/configuration-file-settings-command-line-options-mapping */}}
+            {{/* Default-Werte: /data/db, /var/log/mongodb/mongodb.log */}}
+            {{/*  CAVEAT: fuer ein ReplicaSet fuer MongoDB (nicht verwechseln mit ReplicaSet in Kubernetes) ist eine Pod-Initialisierung notwendig */}}
+            - --auth
+            - --bind_ip_all
+            - --tlsMode=disabled
+            - --wiredTigerCacheSizeGB=0.3
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-env-dev
+          env:
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-dev
+                  key: {{ .Values.admin.password.key }}
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: /data/db
+              name: data-volume
+      {{/* terminationGracePeriodSeconds: 10 */}}
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: data-volume

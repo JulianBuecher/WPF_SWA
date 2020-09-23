@@ -1,0 +1,10 @@
+Das Release {{ quote .Release.Name }} wurde mit dem Chart {{ quote .Chart.Name }} installiert.
+
+Nützliche Kommandos:
+
+  helm status {{ .Release.Name }} --namespace {{ .Values.namespace }}
+  helm get manifest {{ .Release.Name }} --namespace {{ .Values.namespace }}
+
+Port-Forwarding waehrend der Entwicklung:
+  kubectl port-forward service/mailserver {{ .Values.ports.smtp }} {{ .Values.ports.http }} --namespace {{ .Values.namespace }}
+  Dashboard Mailserver:    http://localhost:{{ .Values.ports.http }}

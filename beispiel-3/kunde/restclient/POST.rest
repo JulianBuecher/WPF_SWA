@@ -1,0 +1,15 @@
+### Einen neuen Kunden anlegen
+POST {{baseUrl}}
+Content-Type: application/json
+ALPN: h2
+
+< data/kunde-neu.json
+
+### Einen neuen Kunden mit ungueltigen Daten versuchen anzulegen
+POST {{baseUrl}}
+Content-Type: application/json
+ALPN: h2
+
+< data/kunde-neu-invalid.json
+
+###

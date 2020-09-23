@@ -1,0 +1,14 @@
+Das Release {{ quote .Release.Name }} wurde mit dem Chart {{ quote .Chart.Name }} installiert.
+
+Nützliche Kommandos:
+
+  helm status {{ .Release.Name }} --namespace {{ .Values.namespace }}
+  helm get manifest {{ .Release.Name }} --namespace {{ .Values.namespace }}
+
+  kubectl describe configmap {{ .Release.Name }}-env-dev --namespace {{ .Values.namespace }}
+  kubectl get configmap {{ .Release.Name }}-env-dev --output jsonpath='{.data}' --namespace {{ .Values.namespace }}
+
+  curl --silent --user admin:p http://localhost/{{ .Release.Name }}{{ .Values.gateway.plural }}/api/00000000-0000-0000-0000-000000000001
+  curl --verbose --header 'If-None-Match:\"0\"' --user admin:p http://localhost/{{ .Release.Name }}{{ .Values.gateway.plural }}/api/00000000-0000-0000-0000-000000000001
+  curl --silent --user admin:p http://localhost/{{ .Release.Name }}{{ .Values.gateway.plural }}/home
+

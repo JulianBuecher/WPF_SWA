@@ -1,0 +1,35 @@
+### Suche alle Bestellungen
+GET {{baseUrl}}
+Authorization: {{basic-auth}}
+ALPN: h2
+
+### Suche mit vorhandener Bestellung-ID
+GET {{baseUrl}}/10000000-0000-0000-0000-000000000001
+Accept: application/hal+json
+Authorization: {{basic-auth}}
+ALPN: h2
+
+### Suche mit ungueltiger Bestellung-ID
+GET {{baseUrl}}/YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY
+Accept: application/hal+json
+Authorization: {{basic-auth}}
+ALPN: h2
+
+### Suche mit nicht-vorhandener Bestellung-ID
+GET {{baseUrl}}/FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF
+Accept: application/hal+json
+Authorization: {{basic-auth}}
+ALPN: h2
+
+### Suche mit vorhandener Bestellung-ID und If-None-Match
+GET {{baseUrl}}/10000000-0000-0000-0000-000000000001
+Accept: application/hal+json
+If-None-Match: 0
+Authorization: {{basic-auth}}
+ALPN: h2
+
+### Suche mit vorhandener Kunde-ID
+GET {{baseUrl}}/?kundeId=00000000-0000-0000-0000-000000000001
+Accept: application/hal+json
+Authorization: {{basic-auth}}
+ALPN: h2

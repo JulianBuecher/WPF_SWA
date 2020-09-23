@@ -1,0 +1,110 @@
+# Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# kubectl apply --filename bestellung.yaml
+# kubectl port-forward service/bestellung 8081:8080 --namespace acme
+# curl --user admin:p http://localhost:8081/api/10000000-0000-0000-0000-000000000001
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: acme
+  labels:
+    app: dev
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bestellung-env-dev
+  namespace: acme
+data:
+  TZ: Europe/Berlin
+  SPRING_PROFILES_ACTIVE: dev
+  LOGGING_FILE_NAME: /tmp/application.log
+  SPRING_DATA_MONGODB_HOST: mongodb-0.mongodb.acme.svc.cluster.local
+  SPRING_MAIL_HOST: mailserver
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bestellung
+  labels:
+    app: bestellung
+  namespace: acme
+spec:
+  selector:
+    app: bestellung
+  ports:
+    - port: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bestellung
+  labels:
+    version: v1
+    tier: appserver
+    platform : spring
+  namespace: acme
+spec:
+  selector:
+    matchLabels:
+      app: bestellung
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bestellung
+        version: v1
+    spec:
+      containers:
+        - image: bestellung:1.0
+          name: bestellung
+          envFrom:
+            - configMapRef:
+                name: bestellung-env-dev
+          env:
+            - name: SPRING_DATA_MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-dev
+                  key: username
+            - name: SPRING_DATA_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-dev
+                  key: password
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            periodSeconds: 300
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            periodSeconds: 300
+            failureThreshold: 2
