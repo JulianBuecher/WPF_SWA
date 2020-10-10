@@ -20,7 +20,6 @@ package com.acme.kunde.rest
 
 import com.acme.kunde.Router.Companion.apiPath
 import com.acme.kunde.config.Settings.DEV
-import com.acme.kunde.config.security.CustomUser
 import com.acme.kunde.entity.Adresse
 import com.acme.kunde.entity.GeschlechtType.WEIBLICH
 import com.acme.kunde.entity.InteresseType.LESEN
@@ -366,12 +365,6 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
                     interessen = listOfNotNull(LESEN, REISEN),
                     adresse = Adresse(plz = args.get<String>(5), ort = args.get<String>(6)),
                 )
-                neuerKunde.user = CustomUser(
-                    id = null,
-                    username = args.get<String>(7),
-                    password = "p",
-                    authorities = emptyList(),
-                )
 
                 // act
                 val response = client.post()
@@ -468,12 +461,6 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
                     geschlecht = WEIBLICH,
                     interessen = listOfNotNull(LESEN, REISEN),
                     adresse = Adresse(plz = args.get<String>(5), ort = args.get<String>(6)),
-                )
-                neuerKunde.user = CustomUser(
-                    id = null,
-                    username = args.get<String>(7),
-                    password = "p",
-                    authorities = emptyList(),
                 )
 
                 // act
@@ -874,7 +861,7 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
         const val NEUE_KATEGORIE_INVALID = 11
         const val NEUES_GEBURTSDATUM = "2019-01-31"
         const val NEUES_GEBURTSDATUM_INVALID = "3000-01-01"
-        const val CURRENCY_CODE = "EUR"
+        const val routerRRENCY_CODE = "EUR"
         const val NEUE_HOMEPAGE = "https://test.de"
         const val NEUER_USERNAME = "test"
 

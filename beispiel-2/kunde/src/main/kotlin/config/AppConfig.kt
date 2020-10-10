@@ -17,7 +17,6 @@
 package com.acme.kunde.config
 
 import com.acme.kunde.Router
-import com.acme.kunde.config.security.AuthorizationConfig
 import org.springframework.context.annotation.Configuration
 
 /**
@@ -26,4 +25,4 @@ import org.springframework.context.annotation.Configuration
  * @author [Jürgen Zimmermann](mailto:Juergen.Zimmermann@HS-Karlsruhe.de)
  */
 @Configuration(proxyBeanMethods = false)
-class AppConfig : Router, AuthorizationConfig
+class AppConfig : Router

@@ -16,10 +16,6 @@
  */
 package com.acme.kunde.service
 
-import com.acme.kunde.config.security.CustomUser
-import com.acme.kunde.config.security.CustomUserDetailsService
-import com.acme.kunde.config.security.Rolle
-import com.acme.kunde.config.security.findByUsernameAndAwait
 import com.acme.kunde.db.CriteriaUtil.getCriteria
 import com.acme.kunde.entity.Kunde
 import com.acme.kunde.entity.KundeId
@@ -65,7 +61,6 @@ class KundeService(
     // Annotation im zugehoerigen Parameter des Java-Konstruktors
     private val mongo: ReactiveFluentMongoOperations,
     @Lazy private val validatorFactory: ValidatorFactory,
-    @Lazy private val userService: CustomUserDetailsService,
     @Lazy private val mailer: Mailer,
 ) {
     private val validator by lazy { validatorFactory.validator }
@@ -84,6 +79,7 @@ class KundeService(
         }
 
         // es muss ein Objekt der Klasse UserDetails geben, weil der Benutzername beim Einloggen verwendet wurde
+        // TODO
         val userDetails = userService.findByUsernameAndAwait(username) ?: return FindByIdResult.AccessForbidden()
         val rollen = userDetails
             .authorities
