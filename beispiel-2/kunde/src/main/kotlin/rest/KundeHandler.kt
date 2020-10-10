@@ -76,22 +76,11 @@ class KundeHandler(
     suspend fun findById(request: ServerRequest): ServerResponse {
         val idStr = request.pathVariable(idPathVar)
         val id = KundeId.fromString(idStr)
-        val username = getUsername(request)
 
-        return when (val result = service.findById(id, username)) {
+        return when (val result = service.findById(id)) {
             is FindByIdResult.Success -> handleFound(result.kunde, request)
             is FindByIdResult.NotFound -> notFound().buildAndAwait()
-            is FindByIdResult.AccessForbidden -> status(FORBIDDEN).buildAndAwait()
         }
-    }
-
-    private suspend fun getUsername(request: ServerRequest): String {
-        val username = request
-            .principal()
-            .awaitFirst()
-            .name
-        logger.debug { "username = $username" }
-        return username
     }
 
     private suspend fun handleFound(kunde: Kunde, request: ServerRequest): ServerResponse {
@@ -162,11 +151,6 @@ class KundeHandler(
             is CreateResult.Success -> handleCreated(result.kunde, request)
 
             is CreateResult.ConstraintViolations -> handleConstraintViolations(result.violations)
-
-            is CreateResult.InvalidAccount -> badRequest().bodyValueAndAwait("Ungueltiger Account")
-
-            is CreateResult.UsernameExists ->
-                badRequest().bodyValueAndAwait("Der Username ${result.username} existiert bereits")
 
             is CreateResult.EmailExists ->
                 badRequest().bodyValueAndAwait("Die Emailadresse ${result.email} existiert bereits")
@@ -271,12 +255,10 @@ class KundeHandler(
         val id = KundeId.fromString(idStr)
 
         val patchOps = request.awaitBody<List<PatchOperation>>()
-        val username = getUsername(request)
 
-        val kunde = when (val findByIdResult = service.findById(id, username)) {
+        val kunde = when (val findByIdResult = service.findById(id)) {
             is FindByIdResult.Success -> findByIdResult.kunde
             is FindByIdResult.NotFound -> return notFound().buildAndAwait()
-            is FindByIdResult.AccessForbidden -> return status(FORBIDDEN).buildAndAwait()
         }
 
         val patchedKunde = KundePatcher.patch(kunde, patchOps)

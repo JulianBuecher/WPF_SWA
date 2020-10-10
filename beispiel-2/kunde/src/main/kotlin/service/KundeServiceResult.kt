@@ -33,12 +33,6 @@ sealed class FindByIdResult {
      * Resultat-Typ, wenn kein Kunde gefunden wurde.
      */
     object NotFound : FindByIdResult()
-
-    /**
-     * Resultat-Typ, wenn ein Kunde wegen unzureichender Rollen _nicht_ gesucht werden darf.
-     * @property rollen Die vorhandenen
-     */
-    data class AccessForbidden(val rollen: List<String>? = null) : FindByIdResult()
 }
 
 /**
@@ -56,17 +50,6 @@ sealed class CreateResult {
      * @property violations Die verletzten Constraints
      */
     data class ConstraintViolations(val violations: Set<ConstraintViolation<Kunde>>) : CreateResult()
-
-    /**
-     * Resultat-Typ, wenn bei einem neu anzulegenden Kunden kein gültiger Account angegeben ist.
-     */
-    object InvalidAccount : CreateResult()
-
-    /**
-     * Resultat-Typ, wenn der Username eines neu anzulegenden Kunden bereits existiert.
-     * @property username Der existierende Username
-     */
-    data class UsernameExists(val username: String) : CreateResult()
 
     /**
      * Resultat-Typ, wenn die Email eines neu anzulegenden Kunden bereits existiert.

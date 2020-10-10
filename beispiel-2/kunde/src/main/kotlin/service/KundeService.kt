@@ -46,7 +46,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Service
 import org.springframework.util.MultiValueMap
 import kotlin.reflect.full.isSubclassOf
-import com.acme.kunde.config.security.CreateResult as CreateUserResult
 
 @Suppress("TooManyFunctions")
 /**
@@ -71,30 +70,7 @@ class KundeService(
      * @param username Der username beim Login
      * @return Der gefundene Kunde oder null.
      */
-    suspend fun findById(id: KundeId, username: String): FindByIdResult {
-        val kunde = findById(id)
-
-        if (kunde != null && kunde.username == username) {
-            return FindByIdResult.Success(kunde)
-        }
-
-        // es muss ein Objekt der Klasse UserDetails geben, weil der Benutzername beim Einloggen verwendet wurde
-        // TODO
-        val userDetails = userService.findByUsernameAndAwait(username) ?: return FindByIdResult.AccessForbidden()
-        val rollen = userDetails
-            .authorities
-            .map { grantedAuthority -> grantedAuthority.authority }
-
-        return if (!rollen.contains(Rolle.adminStr)) {
-            FindByIdResult.AccessForbidden(rollen)
-        } else if (kunde == null) {
-            FindByIdResult.NotFound
-        } else {
-            FindByIdResult.Success(kunde)
-        }
-    }
-
-    private suspend fun findById(id: KundeId): Kunde? {
+    suspend fun findById(id: KundeId): FindByIdResult {
         // ggf. TimeoutCancellationException
         val kunde = withTimeout(timeoutShort) {
             // https://github.com/spring-projects/spring-data-examples/tree/master/mongodb/fluent-api
@@ -103,7 +79,12 @@ class KundeService(
                 .awaitOneOrNull()
         }
         logger.debug { "findById: $kunde" }
-        return kunde
+
+        return if (kunde == null) {
+            FindByIdResult.NotFound
+        } else {
+            FindByIdResult.Success(kunde)
+        }
     }
 
     /**
@@ -177,45 +158,18 @@ class KundeService(
             return CreateResult.ConstraintViolations(violations)
         }
 
-        val user = kunde.user ?: return CreateResult.InvalidAccount
-
         val email = kunde.email
         if (emailExists(email)) {
             return CreateResult.EmailExists(email)
         }
-        val createResult = create(user, kunde)
-        if (createResult is CreateResult.UsernameExists) {
-            return createResult
-        }
-
-        createResult as CreateResult.Success
-        if (mailer.send(createResult.kunde) is SendResult.Success) {
+        val kundeDb = withTimeout(timeoutShort) { mongo.insert<Kunde>().oneAndAwait(kunde) }
+        checkNotNull(kundeDb) { "Fehler beim Neuanlegen von Kunde und CustomUser" }
+        if (mailer.send(kundeDb) is SendResult.Success) {
             logger.debug { "Email gesendet" }
         } else {
             // TODO Exception analysieren und evtl. erneutes Senden der Email
             logger.warn { "Email nicht gesendet: Ist der Mailserver erreichbar?" }
         }
-        return createResult
-    }
-
-    private suspend fun create(user: CustomUser, kunde: Kunde): CreateResult {
-        // CustomUser ist keine "data class", deshalb kein copy()
-        val neuerUser = CustomUser(
-            id = null,
-            username = user.username,
-            password = user.password,
-            authorities = listOfNotNull(SimpleGrantedAuthority("ROLE_KUNDE")),
-        )
-
-        val customUserCreated = withTimeout(timeoutShort) {
-            userService.create(neuerUser)
-        }
-        if (customUserCreated is CreateUserResult.UsernameExists) {
-            return CreateResult.UsernameExists(neuerUser.username)
-        }
-
-        customUserCreated as CreateUserResult.Success
-        val kundeDb = create(kunde, customUserCreated.user)
         return CreateResult.Success(kundeDb)
     }
 
@@ -223,17 +177,6 @@ class KundeService(
         mongo.query<Kunde>()
             .matching(Kunde::email isEqualTo email)
             .awaitExists()
-    }
-
-    private suspend fun create(kunde: Kunde, user: CustomUser): Kunde {
-        val neuerKunde = kunde.copy(username = user.username)
-        neuerKunde.user = user
-        logger.trace { "Kunde mit user: $kunde" }
-
-        val kundeDb = withTimeout(timeoutShort) { mongo.insert<Kunde>().oneAndAwait(neuerKunde) }
-        checkNotNull(kundeDb) { "Fehler beim Neuanlegen von Kunde und CustomUser" }
-
-        return kundeDb
     }
 
     /**
@@ -250,7 +193,10 @@ class KundeService(
             return UpdateResult.ConstraintViolations(violations)
         }
 
-        val kundeDb = findById(id) ?: return UpdateResult.NotFound
+        val kundeDb = when (val findByIdResult = findById(id)) {
+            is FindByIdResult.Success -> findByIdResult.kunde
+            is FindByIdResult.NotFound -> return UpdateResult.NotFound
+        }
 
         logger.trace { "update: version=$versionStr, kundeDb=$kundeDb" }
         val version = versionStr.toIntOrNull() ?: return UpdateResult.VersionInvalid(versionStr)

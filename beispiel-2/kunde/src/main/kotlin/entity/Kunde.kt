@@ -148,7 +148,7 @@ data class Kunde(
     override fun toString() = "Kunde(id=$id, version=$version, nachname=$nachname, email=$email, " +
         "kategorie=$kategorie, newsletter=$newsletter, " + "geburtsdatum=$geburtsdatum, umsatz=$umsatz, " +
         "homepage=$homepage, geschlecht=$geschlecht, " + "familienstand=$familienstand, interessen=$interessen, " +
-        "adresse=$adresse, username=$username, erzeugt=$erzeugt, aktualisiert= $aktualisiert, user=$user)"
+        "adresse=$adresse, username=$username, erzeugt=$erzeugt, aktualisiert= $aktualisiert)"
 
     /**
      * Konstante für Kunde-Objekte
