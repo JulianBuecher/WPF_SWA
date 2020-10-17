@@ -83,6 +83,14 @@ spring:
   spel.ignore: true
   thymeleaf.enabled: true
   xml.ignore: true
+  oauth2:
+    client:
+      provider:
+        keycloak:
+          issuer-uri: http://localhost:9000/auth/realms/swa
+      registration:
+        keycloak:
+          client-id: kunde
 
 info.app:
   author: Juergen Zimmermann
