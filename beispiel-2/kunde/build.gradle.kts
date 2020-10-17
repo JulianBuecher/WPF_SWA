@@ -238,8 +238,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-
+    //TODO
     implementation("org.springframework.security:spring-security-oauth2-client:5.4.1")
+    implementation("org.springframework.security:spring-security-oauth2-resource-server:5.4.1")
+    implementation("org.springframework.security:spring-security-oauth2-jose:5.4.1")
     // https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-kotlin-configuration-properties
     // https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-configuration-metadata.html#configuration-metadata-annotation-processor
     // META-INF\additional-spring-configuration-metadata.json

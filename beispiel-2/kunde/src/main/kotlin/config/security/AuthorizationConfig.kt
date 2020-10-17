@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.acme.kunde.config
+package com.acme.kunde.config.security
 
 import com.acme.kunde.Router.Companion.apiPath
 import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest
@@ -42,20 +42,15 @@ interface AuthorizationConfig {
     @Bean
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http {
         authorizeExchange {
-            val bestellungIdPath = "$apiPath/*"
-
             authorize(pathMatchers(POST, apiPath), authenticated)
             authorize(pathMatchers(GET, apiPath), authenticated)
-            authorize(pathMatchers(GET, apiPath), authenticated)
 
-            authorize(EndpointRequest.to("health"), authenticated)
-            authorize(EndpointRequest.toAnyEndpoint(), authenticated)
+            authorize(EndpointRequest.to("health"), permitAll)
+            authorize(EndpointRequest.toAnyEndpoint(), permitAll)
         }
 
-        httpBasic {}
         formLogin { disable() }
-        headers { contentSecurityPolicy { policyDirectives = "default-src 'self'" } }
         csrf { disable() }
-        oauth2Client {  }
+        oauth2ResourceServer { jwt { } }
     }
 }
