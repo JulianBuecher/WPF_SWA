@@ -37,6 +37,7 @@ import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.NOT_MODIFIED
 import org.springframework.http.HttpStatus.PRECONDITION_FAILED
 import org.springframework.http.HttpStatus.PRECONDITION_REQUIRED
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -104,6 +105,7 @@ class KundeHandler(
         return ok().eTag(versionStr).bodyValueAndAwait(kundeModel)
     }
 
+
     /**
      * Suche mit diversen Suchkriterien als Query-Parameter. Es wird `List<Kunde>` statt `Flow<Kunde>` zurückgeliefert,
      * damit auch der Statuscode 204 möglich ist.
@@ -113,6 +115,11 @@ class KundeHandler(
      */
     suspend fun find(request: ServerRequest): ServerResponse {
         val queryParams = request.queryParams()
+        val principal = request.principal().awaitFirst()
+        // printend UUID des Users -> könnte man als username nehmen und als Identifizierung
+        val principalName = request.principal().awaitFirst().name
+        println(principal.toString())
+        println(principalName.toString())
 
         // https://stackoverflow.com/questions/45903813/webflux-functional-how-to-detect-an-empty-flux-and-return-404
         val kunden = mutableListOf<Kunde>()
