@@ -4,7 +4,8 @@ target
 .gradle
 gradle.properties
 config/images
-*.idea 
+*.idea
 *.iml
-*.ipr 
-*.iws 
+*.ipr
+*.iws
+application.pid
