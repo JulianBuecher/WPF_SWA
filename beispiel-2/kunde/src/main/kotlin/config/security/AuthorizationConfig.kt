@@ -76,17 +76,14 @@ interface AuthorizationConfig {
         return ReactiveJwtAuthenticationConverterAdapter(extractor)
     }
 
-    // TODO: Muss noch schöngeschrieben werden
     class GrantedAuthoritiesExtractor : JwtAuthenticationConverter() {
         override fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> {
             // Wir wollen realm access und nicht account
             val resource = jwt.getClaimAsMap("realm_access")
 
-            @Suppress("UNCHECKED_CAST")
-            val roles = resource["roles"] as List<String>
+            val roles: List<String> = (resource["roles"] as List<*>).filterIsInstance<String>()
             println(roles.stream().toList().toString())
-            @Suppress("UNCHECKED_CAST")
-            var p = roles.stream()
+            val p = roles.stream()
                 .map { role: String? -> SimpleGrantedAuthority(role) }
                 .collect(Collectors.toList())
 
