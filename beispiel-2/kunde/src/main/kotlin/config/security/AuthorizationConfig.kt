@@ -17,6 +17,7 @@
 package com.acme.kunde.config.security
 
 import com.acme.kunde.Router.Companion.apiPath
+import mu.KotlinLogging
 import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.core.convert.converter.Converter
@@ -76,6 +77,8 @@ interface AuthorizationConfig {
 
     class GrantedAuthoritiesExtractor : JwtAuthenticationConverter() {
         override fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> {
+            val logger = KotlinLogging.logger {}
+
             // Wir wollen realm access und nicht account
             val resource = jwt.getClaimAsMap("realm_access")
 
@@ -83,12 +86,10 @@ interface AuthorizationConfig {
                 if (resource["roles"] == null) listOf() else (resource["roles"] as List<*>).filterIsInstance<String>()
             println(roles.stream().toList().toString())
 
-            @Suppress("UNCHECKED_CAST")
-            var p = roles.stream()
+            val p = roles.stream()
                 .map { role: String? -> SimpleGrantedAuthority(role?.toUpperCase()) }
                 .collect(Collectors.toList())
-
-            println(p.toString())
+            logger.info { p }
 
             return roles.stream()
                 .map { role: String? -> SimpleGrantedAuthority(String.format("ROLE_${role?.toUpperCase()}")) }
