@@ -81,7 +81,8 @@ interface AuthorizationConfig {
             // Wir wollen realm access und nicht account
             val resource = jwt.getClaimAsMap("realm_access")
 
-            val roles: List<String> = (resource["roles"] as List<*>).filterIsInstance<String>()
+            val roles: List<String> =
+                if (resource["roles"] == null) listOf() else (resource["roles"] as List<*>).filterIsInstance<String>()
             println(roles.stream().toList().toString())
             val p = roles.stream()
                 .map { role: String? -> SimpleGrantedAuthority(role) }
