@@ -32,7 +32,8 @@ object Versions {
     //val kotlinJvmTarget = org.gradle.api.JavaVersion.VERSION_13.majorVersion
     val kotlinJvmTarget = org.gradle.api.JavaVersion.VERSION_11.majorVersion
 
-    const val buildPackJava = "14.0.2"
+//    const val buildPackJava = "14.0.2"
+    const val buildPackJava = "15.*"
 
     val jibJava = org.gradle.api.JavaVersion.VERSION_14.majorVersion
     //val jibJava = org.gradle.api.JavaVersion.VERSION_11.majorVersion

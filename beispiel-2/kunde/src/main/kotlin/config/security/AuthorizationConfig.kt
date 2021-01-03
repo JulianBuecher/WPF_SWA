@@ -21,9 +21,9 @@ import org.springframework.boot.actuate.autoconfigure.security.reactive.Endpoint
 import org.springframework.context.annotation.Bean
 import org.springframework.core.convert.converter.Converter
 import org.springframework.http.HttpMethod.GET
-import org.springframework.http.HttpMethod.POST
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
+import org.springframework.security.config.core.GrantedAuthorityDefaults
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
 import org.springframework.security.core.GrantedAuthority
@@ -55,9 +55,10 @@ interface AuthorizationConfig {
     @Bean
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http {
         authorizeExchange {
-            authorize(pathMatchers(POST, apiPath), hasRole("student"))
-            // warum nicht hasRole("student")
-            authorize(pathMatchers(GET, apiPath), hasAuthority("student"))
+//            authorize(pathMatchers(POST, apiPath), hasRole("student"))
+//            // warum nicht hasRole("student")
+//            authorize(pathMatchers(GET, apiPath), hasAuthority("STUDENT"))
+            authorize(pathMatchers(GET, String.format("$apiPath/**")), hasAuthority("STUDENT"))
 
             authorize(EndpointRequest.to("health"), permitAll)
             authorize(EndpointRequest.toAnyEndpoint(), permitAll)
@@ -68,6 +69,14 @@ interface AuthorizationConfig {
         oauth2ResourceServer {
             jwt { jwtAuthenticationConverter = grantedAuthoritiesExtractor() }
         }
+    }
+
+    /**
+     * Removes the ROLE_ Prefix
+     */
+    @Bean
+    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults? {
+        return GrantedAuthorityDefaults("")
     }
 
 
@@ -87,13 +96,13 @@ interface AuthorizationConfig {
             println(roles.stream().toList().toString())
             @Suppress("UNCHECKED_CAST")
             var p = roles.stream()
-                .map { role: String? -> SimpleGrantedAuthority(role) }
+                .map { role: String? -> SimpleGrantedAuthority(role?.toUpperCase()) }
                 .collect(Collectors.toList())
 
             println(p.toString())
 
             return roles.stream()
-                .map { role: String? -> SimpleGrantedAuthority(role) }
+                .map { role: String? -> SimpleGrantedAuthority(role?.toUpperCase()) }
                 .collect(Collectors.toList())
         }
     }

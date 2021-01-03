@@ -88,6 +88,7 @@ spring:
         resourceserver:
           jwt:
             issuer-uri: http://localhost:9900/auth/realms/swa
+            jwk-set-uri: http://localhost:9900/auth/realms/swa/protocol/openid-connect/certs
 
 info.app:
   author: Juergen Zimmermann
