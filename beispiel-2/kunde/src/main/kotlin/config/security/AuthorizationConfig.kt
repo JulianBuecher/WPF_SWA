@@ -71,7 +71,7 @@ interface AuthorizationConfig {
     }
 
 
-    private fun grantedAuthoritiesExtractor(): Converter<Jwt, out Mono<out AbstractAuthenticationToken>>? {
+    private fun grantedAuthoritiesExtractor(): Converter<Jwt, out Mono<out AbstractAuthenticationToken>> {
         val extractor = GrantedAuthoritiesExtractor()
         return ReactiveJwtAuthenticationConverterAdapter(extractor)
     }
