@@ -96,6 +96,7 @@ class BestellungService(
         // org.springframework.web.reactive.function.client.DefaultWebClient
         val client = clientBuilder
             .baseUrl("http://$kundeService:$kundePort")
+            // TODO: Use JWT Bearer Token for Authentication to Kunde-Service
             .filter(basicAuthentication(username, password))
             .build()
 
@@ -144,7 +145,8 @@ class BestellungService(
          * Rechnername des Kunde-Service durch _Service Registry_ von Kubernetes (und damit Istio).
          */
         // https://github.com/istio/istio/blob/master/samples/bookinfo/src/reviews/reviews-application/src/main/java/application/rest/LibertyRestEndpoint.java#L43
-        val kundeService = System.getenv("KUNDE_HOSTNAME") ?: "kunde"
+//        val kundeService = System.getenv("KUNDE_HOSTNAME") ?: "kunde"
+        val kundeService = System.getenv("KUNDE_HOSTNAME") ?: "localhost"
 
         /**
          * Port des Kunde-Service durch _Service Registry_ von Kubernetes (und damit Istio).

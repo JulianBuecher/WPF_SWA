@@ -53,11 +53,17 @@ function Uninstall-Keycloak {
     kubectl delete configmap keycloak-env-dev
 
     kubectl delete statefulset keycloak
-    kubectl delete persistentvolume keycloak-volume
+    kubectl delete persistentvolume, pvc keycloak-volume
 }
 
 function Set-Forward-Keycloak {
     kubectl port-forward service/keycloak $port --namespace $namespace
+}
+
+function Convert-Base64() {
+    $str = 'p'
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($str)
+    [System.Convert]::ToBase64String($bytes)
 }
 
 switch ($cmd) {
@@ -71,9 +77,11 @@ switch ($cmd) {
         break
     }
 
+    'base64' { Convert-Base64; break }
+
     default {
         $script = $myInvocation.MyCommand.Name
-        Write-Output "$script [install|uninstall|forward-mailserver|forward-mongodb|base64]"
+        Write-Output "$script [install|uninstall|forward-keycloak|base64]"
     }
 }
 

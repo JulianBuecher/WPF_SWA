@@ -17,7 +17,7 @@
 context.initializer.classes: com.acme.bestellung.BeansInitializer
 
 server:
-  #port: 8080
+  port: 8081
   compression:
     enabled: true
     mime-types: application/hal+json
@@ -29,14 +29,15 @@ spring:
   application.name: bestellung
   aop.proxy-target-class: false
   data.mongodb:
-    authentication-database: admin
+#    authentication-database: admin
     auto-index-creation: false
     repositories.type: none
-    database: acme
-    host: localhost
+#    database: acme
+#    host: localhost
     #password: ...
-    username: admin
+#    username: admin
     uuid-representation: standard
+    uri: mongodb://admin:p@localhost:27017/acme?authSource=admin&authMechanism=SCRAM-SHA-256
   jackson.default-property-inclusion: non_null
   lifecycle.timeout-per-shutdown-phase: 3s
   main.lazy-initialization: true
@@ -45,6 +46,12 @@ spring:
   spel.ignore: true
   thymeleaf.enabled: true
   xml.ignore: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9900/auth/realms/swa
+          jwk-set-uri: http://localhost:9900/auth/realms/swa/protocol/openid-connect/certs
 
 info.app:
   author: Juergen Zimmermann
