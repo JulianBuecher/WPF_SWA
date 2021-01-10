@@ -1,0 +1,36 @@
+{{/*Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe*/}}
+
+  {{/*This program is free software: you can redistribute it and/or modify*/}}
+  {{/*it under the terms of the GNU General Public License as published by*/}}
+  {{/*the Free Software Foundation, either version 3 of the License, or*/}}
+  {{/*(at your option) any later version.*/}}
+
+  {{/*This program is distributed in the hope that it will be useful,*/}}
+  {{/*but WITHOUT ANY WARRANTY; without even the implied warranty of*/}}
+  {{/*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the*/}}
+  {{/*GNU General Public License for more details.*/}}
+
+  {{/*You should have received a copy of the GNU General Public License*/}}
+  {{/*along with this program.  If not, see <http://www.gnu.org/licenses/>.*/}}
+
+  {{/* https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistent-volumes */}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: keycloak-volume
+  labels:
+    type: local
+  {{/* Ein "Persistent Volume" ist "cluster-scoped" und nicht einem Namespace zugeordnet */}}
+spec:
+  capacity:
+    storage: {{ .Values.storage }}
+  accessModes:
+    - ReadWriteOnce
+  {{/* https://kubernetes.io/docs/concepts/storage/storage-classes */}}
+  storageClassName: hostpath
+  {{/* https://kubernetes.io/docs/concepts/storage/volumes/#hostpath */}}
+  hostPath:
+    {{/* https://github.com/docker/for-win/issues/5325 : "we don't support hostpath volumes in wsl2" */}}
+    {{/* https://stackoverflow.com/questions/62812948/volume-mounts-not-working-kubernetes-and-wsl-2-and-docker */}}
+    path: {{ .Values.hostpath }}
+    type: DirectoryOrCreate

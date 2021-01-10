@@ -49,11 +49,11 @@ function Install-Keycloak {
 function Uninstall-Keycloak {
     kubectl config set-context --current --namespace $namespace
 
-    kubectl delete deployment,svc keycloak
+    kubectl delete statefulset,svc keycloak
+    kubectl delete persistentvolumeclaim keycloak-volume-keycloak-0
+    kubectl delete persistentvolume keycloak-volume
     kubectl delete configmap keycloak-env-dev
-
-    kubectl delete statefulset keycloak
-    kubectl delete persistentvolume, pvc keycloak-volume
+    kubectl delete secret keycloak-password-dev
 }
 
 function Set-Forward-Keycloak {

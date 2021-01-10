@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import java.net.http.HttpHeaders
+import java.net.http.HttpRequest
 
 /**
  * Anwendungslogik für Bestellungen.
@@ -97,7 +99,8 @@ class BestellungService(
         val client = clientBuilder
             .baseUrl("http://$kundeService:$kundePort")
             // TODO: Use JWT Bearer Token for Authentication to Kunde-Service
-            .filter(basicAuthentication(username, password))
+//            .filter(basicAuthentication(username, password))
+            .defaultHeader("Bearer","Bearer-Token")
             .build()
 
         return client
