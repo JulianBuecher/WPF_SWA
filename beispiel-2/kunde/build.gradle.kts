@@ -167,6 +167,7 @@ repositories {
     //}
     // https://github.com/spring-projects/spring-framework/wiki/Spring-repository-FAQ
     // https://github.com/spring-projects/spring-framework/wiki/Release-Process
+    // https://spring.io/blog/2020/10/29/notice-of-permissions-changes-to-repo-spring-io-fall-and-winter-2020#january-6-2021
     maven("https://repo.spring.io/milestone") {
         mavenContent { releasesOnly() }
     }
@@ -174,6 +175,7 @@ repositories {
         mavenContent { releasesOnly() }
     }
 
+    // Wird für org.jetbrains.kotinx:kotlinx-html-jvm:0.7.2 benötigt (Dependency von detekt)
     jcenter()
 
     // Snapshots von Spring Framework, Spring Boot, Spring Data und Spring Security

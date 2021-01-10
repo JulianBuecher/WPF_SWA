@@ -8,6 +8,7 @@ pluginManagement {
         //maven("https://dl.bintray.com/kotlin/kotlin-dev") {
         //    mavenContent { snapshotsOnly() }
         //}
+        // https://spring.io/blog/2020/10/29/notice-of-permissions-changes-to-repo-spring-io-fall-and-winter-2020#january-6-2021
         maven("https://repo.spring.io/milestone")
         maven("https://repo.spring.io/plugins-release")
 
