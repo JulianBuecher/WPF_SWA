@@ -8,7 +8,7 @@ pluginManagement {
         //maven("https://dl.bintray.com/kotlin/kotlin-dev") {
         //    mavenContent { snapshotsOnly() }
         //}
-        maven("https://repo.spring.io/libs-milestone")
+        maven("https://repo.spring.io/milestone")
         maven("https://repo.spring.io/plugins-release")
 
         //jcenter()

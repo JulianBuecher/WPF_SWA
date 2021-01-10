@@ -167,14 +167,14 @@ repositories {
     //}
     // https://github.com/spring-projects/spring-framework/wiki/Spring-repository-FAQ
     // https://github.com/spring-projects/spring-framework/wiki/Release-Process
-    maven("https://repo.spring.io/libs-milestone") {
+    maven("https://repo.spring.io/milestone") {
         mavenContent { releasesOnly() }
     }
     maven("https://repo.spring.io/release") {
         mavenContent { releasesOnly() }
     }
 
-    //jcenter()
+    jcenter()
 
     // Snapshots von Spring Framework, Spring Boot, Spring Data und Spring Security
     //maven("https://repo.spring.io/libs-snapshot") {

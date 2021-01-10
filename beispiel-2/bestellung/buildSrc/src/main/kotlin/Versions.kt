@@ -116,8 +116,8 @@ object Versions {
     //const val ktlintKotlin = "1.3.72"
     const val httpClientKtlint = "4.5.12"
     // https://www.eclemma.org/jacoco : 0.8.6-20200410.013514-49
-	const val jacocoVersion = "0.8.6-SNAPSHOT"
-    //const val jacocoVersion = "0.8.6"
+	// const val jacocoVersion = "0.8.6-SNAPSHOT"
+    const val jacocoVersion = "0.8.6"
     const val allure = "2.13.5"
     const val allureCommandline = allure
     const val allureJunit = allure
