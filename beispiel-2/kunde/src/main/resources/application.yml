@@ -17,7 +17,7 @@
 context.initializer.classes: com.acme.kunde.BeansInitializer
 
 server:
-  #port: 8080
+  port: 8080
   compression:
     enabled: true
     mime-types: application/hal+json
@@ -25,7 +25,7 @@ server:
   error.whitelabel.enabled: false
   http2.enabled: true
   ssl:
-    enabled: true
+    enabled: false
     enabled-protocols: TLSv1.3,TLSv1.2
     key-alias: microservice
     key-password: zimmermann

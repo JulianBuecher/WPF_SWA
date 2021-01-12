@@ -57,8 +57,8 @@ interface AuthorizationConfig {
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http {
         authorizeExchange {
             val apiPath = String.format("$apiPath/**")
-            authorize(pathMatchers(POST, apiPath), hasRole("STUDENT"))
-            authorize(pathMatchers(GET, apiPath), hasRole("STUDENT"))
+            authorize(pathMatchers(POST, apiPath), hasRole("ADMIN"))
+            authorize(pathMatchers(GET, apiPath), hasRole("ADMIN"))
 
             authorize(EndpointRequest.to("health"), permitAll)
             authorize(EndpointRequest.toAnyEndpoint(), permitAll)

@@ -61,11 +61,11 @@ class BestellungService(
      * Alle Bestellungen ermitteln.
      * @return Alle Bestellungen.
      */
-    suspend fun findAll(): Flow<Bestellung> = mongo.query<Bestellung>()
+    suspend fun findAll(token: String): Flow<Bestellung> = mongo.query<Bestellung>()
         .flow()
         .onEach { bestellung ->
             logger.debug { "findAll: $bestellung" }
-            val kunde = findKundeById(bestellung.kundeId)
+            val kunde = findKundeById(bestellung.kundeId,token)
             bestellung.kundeNachname = kunde.nachname
         }
 
@@ -74,7 +74,7 @@ class BestellungService(
      * @param id Die Id der gesuchten Bestellung.
      * @return Die gefundene Bestellung oder null.
      */
-    suspend fun findById(id: String): Bestellung? {
+    suspend fun findById(id: String,token: String): Bestellung? {
         val bestellung = mongo.query<Bestellung>()
             .matching(query(Bestellung::id isEqualTo id))
             .awaitOneOrNull()
@@ -83,7 +83,7 @@ class BestellungService(
             return bestellung
         }
 
-        val (nachname) = findKundeById(bestellung.kundeId)
+        val (nachname) = findKundeById(bestellung.kundeId,token)
         return bestellung.apply { kundeNachname = nachname }
     }
 
@@ -92,7 +92,7 @@ class BestellungService(
      * @param kundeId Die Id des gesuchten Kunden.
      * @return Der gefundene Kunde oder null.
      */
-    suspend fun findKundeById(kundeId: KundeId): Kunde {
+    suspend fun findKundeById(kundeId: KundeId,token: String): Kunde {
         logger.debug { "findKundeById: $kundeId" }
 
         // org.springframework.web.reactive.function.client.DefaultWebClient
@@ -100,7 +100,7 @@ class BestellungService(
             .baseUrl("http://$kundeService:$kundePort")
             // TODO: Use JWT Bearer Token for Authentication to Kunde-Service
 //            .filter(basicAuthentication(username, password))
-            .defaultHeader("Bearer","Bearer-Token")
+            .defaultHeader("Authorization",token)
             .build()
 
         return client
@@ -115,8 +115,8 @@ class BestellungService(
      * @param kundeId Die Id des gegebenen Kunden.
      * @return Die gefundenen Bestellungen oder ein leeres Flux-Objekt.
      */
-    suspend fun findByKundeId(kundeId: KundeId): Flow<Bestellung> {
-        val (nachname) = findKundeById(kundeId)
+    suspend fun findByKundeId(kundeId: KundeId,token: String): Flow<Bestellung> {
+        val (nachname) = findKundeById(kundeId,token)
 
         val criteria = where(Bestellung::kundeId).regex("\\.*$kundeId\\.*", "i")
         return mongo.query<Bestellung>().matching(Query(criteria))

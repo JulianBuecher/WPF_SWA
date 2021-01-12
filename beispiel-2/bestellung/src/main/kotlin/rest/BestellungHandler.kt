@@ -30,6 +30,8 @@ import org.springframework.hateoas.server.reactive.toModelAndAwait
 import org.springframework.http.HttpHeaders.IF_NONE_MATCH
 import org.springframework.http.HttpStatus.NOT_MODIFIED
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.created
@@ -59,9 +61,11 @@ class BestellungHandler(private val service: BestellungService, private val mode
      */
     suspend fun findById(request: ServerRequest): ServerResponse {
         val id = request.pathVariable(idPathVar)
-
-        val bestellung = service.findById(id) ?: return notFound().buildAndAwait()
+        var token = request.headers().header("authorization").toString()
+        token = token.removeSurrounding("[","]")
+        val bestellung = service.findById(id,token) ?: return notFound().buildAndAwait()
         logger.debug { "findById: $bestellung" }
+        logger.debug { "Containing Access-Token: ${request.headers().header("Authorization")}" }
 
         val version = bestellung.version
         val versionHeader = request.headers()
@@ -90,19 +94,21 @@ class BestellungHandler(private val service: BestellungService, private val mode
     @Suppress("ReturnCount", "LongMethod")
     suspend fun find(request: ServerRequest): ServerResponse {
         val queryParams = request.queryParams()
+        var token = request.headers().header("authorization").toString()
+        token = token.removeSurrounding("[","]")
         if (queryParams.size > 1) {
             return notFound().buildAndAwait()
         }
 
         val bestellungen = if (queryParams.isEmpty()) {
-            service.findAll()
+            service.findAll(token)
         } else {
             val kundeId = request.queryParam("kundeId")
             if (!kundeId.isPresent) {
                 return notFound().buildAndAwait()
             }
 
-            service.findByKundeId(KundeId.fromString(kundeId.get()))
+            service.findByKundeId(KundeId.fromString(kundeId.get()),token)
         }
 
         val bestellungenList = mutableListOf<Bestellung>()
