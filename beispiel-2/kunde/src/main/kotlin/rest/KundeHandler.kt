@@ -37,6 +37,7 @@ import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.NOT_MODIFIED
 import org.springframework.http.HttpStatus.PRECONDITION_FAILED
 import org.springframework.http.HttpStatus.PRECONDITION_REQUIRED
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -76,22 +77,11 @@ class KundeHandler(
     suspend fun findById(request: ServerRequest): ServerResponse {
         val idStr = request.pathVariable(idPathVar)
         val id = KundeId.fromString(idStr)
-        val username = getUsername(request)
 
-        return when (val result = service.findById(id, username)) {
+        return when (val result = service.findById(id)) {
             is FindByIdResult.Success -> handleFound(result.kunde, request)
             is FindByIdResult.NotFound -> notFound().buildAndAwait()
-            is FindByIdResult.AccessForbidden -> status(FORBIDDEN).buildAndAwait()
         }
-    }
-
-    private suspend fun getUsername(request: ServerRequest): String {
-        val username = request
-            .principal()
-            .awaitFirst()
-            .name
-        logger.debug { "username = $username" }
-        return username
     }
 
     private suspend fun handleFound(kunde: Kunde, request: ServerRequest): ServerResponse {
@@ -115,6 +105,7 @@ class KundeHandler(
         return ok().eTag(versionStr).bodyValueAndAwait(kundeModel)
     }
 
+
     /**
      * Suche mit diversen Suchkriterien als Query-Parameter. Es wird `List<Kunde>` statt `Flow<Kunde>` zurückgeliefert,
      * damit auch der Statuscode 204 möglich ist.
@@ -124,6 +115,11 @@ class KundeHandler(
      */
     suspend fun find(request: ServerRequest): ServerResponse {
         val queryParams = request.queryParams()
+        val principal = request.principal().awaitFirst()
+        // printend UUID des Users -> könnte man als username nehmen und als Identifizierung
+        val principalName = request.principal().awaitFirst().name
+        println(principal.toString())
+        println(principalName.toString())
 
         // https://stackoverflow.com/questions/45903813/webflux-functional-how-to-detect-an-empty-flux-and-return-404
         val kunden = mutableListOf<Kunde>()
@@ -162,11 +158,6 @@ class KundeHandler(
             is CreateResult.Success -> handleCreated(result.kunde, request)
 
             is CreateResult.ConstraintViolations -> handleConstraintViolations(result.violations)
-
-            is CreateResult.InvalidAccount -> badRequest().bodyValueAndAwait("Ungueltiger Account")
-
-            is CreateResult.UsernameExists ->
-                badRequest().bodyValueAndAwait("Der Username ${result.username} existiert bereits")
 
             is CreateResult.EmailExists ->
                 badRequest().bodyValueAndAwait("Die Emailadresse ${result.email} existiert bereits")
@@ -271,12 +262,10 @@ class KundeHandler(
         val id = KundeId.fromString(idStr)
 
         val patchOps = request.awaitBody<List<PatchOperation>>()
-        val username = getUsername(request)
 
-        val kunde = when (val findByIdResult = service.findById(id, username)) {
+        val kunde = when (val findByIdResult = service.findById(id)) {
             is FindByIdResult.Success -> findByIdResult.kunde
             is FindByIdResult.NotFound -> return notFound().buildAndAwait()
-            is FindByIdResult.AccessForbidden -> return status(FORBIDDEN).buildAndAwait()
         }
 
         val patchedKunde = KundePatcher.patch(kunde, patchOps)

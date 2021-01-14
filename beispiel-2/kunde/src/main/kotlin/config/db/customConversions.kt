@@ -16,7 +16,6 @@
  */
 package com.acme.kunde.config.db
 
-import com.acme.kunde.config.security.CustomUser
 import com.acme.kunde.entity.FamilienstandType
 import com.acme.kunde.entity.GeschlechtType
 import com.acme.kunde.entity.InteresseType
@@ -35,9 +34,5 @@ fun customConversions() = MongoCustomConversions(
         FamilienstandType.WriteConverter(),
         InteresseType.ReadConverter(),
         InteresseType.WriteConverter(),
-
-        // Rollen fuer Security
-        CustomUser.RoleReadConverter(),
-        CustomUser.RoleWriteConverter(),
     )
 )

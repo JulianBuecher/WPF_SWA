@@ -39,6 +39,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import java.net.http.HttpHeaders
+import java.net.http.HttpRequest
 
 /**
  * Anwendungslogik für Bestellungen.
@@ -59,11 +61,11 @@ class BestellungService(
      * Alle Bestellungen ermitteln.
      * @return Alle Bestellungen.
      */
-    suspend fun findAll(): Flow<Bestellung> = mongo.query<Bestellung>()
+    suspend fun findAll(token: String): Flow<Bestellung> = mongo.query<Bestellung>()
         .flow()
         .onEach { bestellung ->
             logger.debug { "findAll: $bestellung" }
-            val kunde = findKundeById(bestellung.kundeId)
+            val kunde = findKundeById(bestellung.kundeId,token)
             bestellung.kundeNachname = kunde.nachname
         }
 
@@ -72,7 +74,7 @@ class BestellungService(
      * @param id Die Id der gesuchten Bestellung.
      * @return Die gefundene Bestellung oder null.
      */
-    suspend fun findById(id: String): Bestellung? {
+    suspend fun findById(id: String,token: String): Bestellung? {
         val bestellung = mongo.query<Bestellung>()
             .matching(query(Bestellung::id isEqualTo id))
             .awaitOneOrNull()
@@ -81,7 +83,7 @@ class BestellungService(
             return bestellung
         }
 
-        val (nachname) = findKundeById(bestellung.kundeId)
+        val (nachname) = findKundeById(bestellung.kundeId,token)
         return bestellung.apply { kundeNachname = nachname }
     }
 
@@ -90,13 +92,15 @@ class BestellungService(
      * @param kundeId Die Id des gesuchten Kunden.
      * @return Der gefundene Kunde oder null.
      */
-    suspend fun findKundeById(kundeId: KundeId): Kunde {
+    suspend fun findKundeById(kundeId: KundeId,token: String): Kunde {
         logger.debug { "findKundeById: $kundeId" }
 
         // org.springframework.web.reactive.function.client.DefaultWebClient
         val client = clientBuilder
             .baseUrl("http://$kundeService:$kundePort")
-            .filter(basicAuthentication(username, password))
+            // TODO: Use JWT Bearer Token for Authentication to Kunde-Service
+//            .filter(basicAuthentication(username, password))
+            .defaultHeader("Authorization",token)
             .build()
 
         return client
@@ -111,8 +115,8 @@ class BestellungService(
      * @param kundeId Die Id des gegebenen Kunden.
      * @return Die gefundenen Bestellungen oder ein leeres Flux-Objekt.
      */
-    suspend fun findByKundeId(kundeId: KundeId): Flow<Bestellung> {
-        val (nachname) = findKundeById(kundeId)
+    suspend fun findByKundeId(kundeId: KundeId,token: String): Flow<Bestellung> {
+        val (nachname) = findKundeById(kundeId,token)
 
         val criteria = where(Bestellung::kundeId).regex("\\.*$kundeId\\.*", "i")
         return mongo.query<Bestellung>().matching(Query(criteria))
@@ -144,7 +148,8 @@ class BestellungService(
          * Rechnername des Kunde-Service durch _Service Registry_ von Kubernetes (und damit Istio).
          */
         // https://github.com/istio/istio/blob/master/samples/bookinfo/src/reviews/reviews-application/src/main/java/application/rest/LibertyRestEndpoint.java#L43
-        val kundeService = System.getenv("KUNDE_HOSTNAME") ?: "kunde"
+//        val kundeService = System.getenv("KUNDE_HOSTNAME") ?: "kunde"
+        val kundeService = System.getenv("KUNDE_HOSTNAME") ?: "localhost"
 
         /**
          * Port des Kunde-Service durch _Service Registry_ von Kubernetes (und damit Istio).

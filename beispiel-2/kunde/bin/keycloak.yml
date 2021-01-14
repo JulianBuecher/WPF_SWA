@@ -1,0 +1,117 @@
+# Deployment File for Keycloak
+
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: acme
+    labels:
+      app: dev
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-env-dev
+  namespace: acme
+data:
+  TZ: Europe/Berlin
+  KEYCLOAK_USER: keycloak
+  JAVA_OPTS: " -Dkeycloak.profile.feature.scripts=enabled -Dkeycloak.profile.feature.upload_scripts=enabled"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+  namespace: acme
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 9900
+      targetPort: 8080
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-password-dev
+  namespace: acme
+type: Opaque
+data:
+  # password als Key, Value mit Base64-Codierung
+  admin_password: cA==
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: keycloak-volume
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: hostpath
+  hostPath:
+    path: /run/desktop/mnt/host/c/Zimmermann/volumes/keycloak
+    type: Directory
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  labels:
+    version: 11.0.2
+    tier: backend
+  namespace: acme
+spec:
+  selector:
+    matchLabels:
+      app: keycloak
+      version: 11.0.2
+  serviceName: keycloak
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        version: 11.0.2
+    spec:
+      containers:
+        - image: jboss/keycloak:11.0.2
+          name: keycloak
+          envFrom:
+            - configMapRef:
+                name: keycloak-env-dev
+          env:
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-password-dev
+                  key: admin_password
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /opt/jboss/keycloak/standalone/data
+              name: keycloak-volume
+  volumeClaimTemplates:
+    - metadata:
+        name: keycloak-volume
+        labels:
+          type: local
+        namespace: acme
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: hostpath
+

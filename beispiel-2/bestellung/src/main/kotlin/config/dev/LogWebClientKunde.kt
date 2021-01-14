@@ -24,6 +24,10 @@ import mu.KotlinLogging
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.ExchangeFunction
+
 
 /**
  * Den Microservice _kunde_ mit WebClient aufrufen.
@@ -44,12 +48,25 @@ interface LogWebClientKunde {
 
         runBlocking {
             val kundeId = KundeId.fromString("00000000-0000-0000-0000-000000000001")
-            val kunde = bestellungService.findKundeById(kundeId)
-            logger.warn { "Kunde zur ID $kundeId: $kunde" }
+            // TODO: Hier muss noch eine Token-Weiterleitung eingebaut werden (für was auch immer :D)
+//            val token = oAuthToken().toString()
+//            val kunde = bestellungService.findKundeById(kundeId,token)
+//            logger.warn { "Kunde zur ID $kundeId: $kunde" }
         }
     }
 
     // Fuer OAuth siehe
     // https://github.com/bclozel/spring-reactive-university/blob/master/src/main/java/com/example/integration/...
     //      ...gitter/GitterClient.java
+    private fun oAuthToken(token: String): ExchangeFilterFunction? {
+        return ExchangeFilterFunction { clientRequest: ClientRequest, exchangeFunction: ExchangeFunction ->
+            exchangeFunction
+                .exchange(
+                    ClientRequest
+                        .from(clientRequest)
+                        .header("Authorization", "Bearer $token")
+                        .build()
+                )
+        }
+    }
 }

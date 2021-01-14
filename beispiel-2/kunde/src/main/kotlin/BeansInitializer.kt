@@ -25,7 +25,6 @@ import com.acme.kunde.config.db.writeConcernResolver
 import com.acme.kunde.config.dev.LogCommandLine
 import com.acme.kunde.config.dev.LogCommandLineSecurity
 import com.acme.kunde.config.dev.loggingMappingEvents
-import com.acme.kunde.config.security.passwordEncoder
 import com.acme.kunde.config.validatorFactory
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.support.GenericApplicationContext
@@ -51,7 +50,6 @@ class BeansInitializer : ApplicationContextInitializer<GenericApplicationContext
  */
 val beans = beans {
     bean(::validatorFactory)
-    bean(::passwordEncoder)
     bean(::customConversions)
     bean(::generateKundeId)
     bean(::writeConcernResolver)

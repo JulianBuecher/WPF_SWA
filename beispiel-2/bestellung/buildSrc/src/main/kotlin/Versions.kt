@@ -32,7 +32,8 @@ object Versions {
     //val kotlinJvmTarget = org.gradle.api.JavaVersion.VERSION_13.majorVersion
     val kotlinJvmTarget = org.gradle.api.JavaVersion.VERSION_11.majorVersion
 
-    const val buildPackJava = "14.0.2"
+//    const val buildPackJava = "14.0.2"
+    const val buildPackJava = "15.*"
 
     val jibJava = org.gradle.api.JavaVersion.VERSION_14.majorVersion
     //val jibJava = org.gradle.api.JavaVersion.VERSION_11.majorVersion
@@ -115,8 +116,8 @@ object Versions {
     //const val ktlintKotlin = "1.3.72"
     const val httpClientKtlint = "4.5.12"
     // https://www.eclemma.org/jacoco : 0.8.6-20200410.013514-49
-	const val jacocoVersion = "0.8.6-SNAPSHOT"
-    //const val jacocoVersion = "0.8.6"
+	// const val jacocoVersion = "0.8.6-SNAPSHOT"
+    const val jacocoVersion = "0.8.6"
     const val allure = "2.13.5"
     const val allureCommandline = allure
     const val allureJunit = allure

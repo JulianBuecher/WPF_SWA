@@ -75,7 +75,7 @@ class HtmlHandler(private val service: KundeService) {
         if (idStr != null) {
             val id = KundeId.fromString(idStr)
             val username = getUsername(request)
-            val findByIdResult = service.findById(id, username)
+            val findByIdResult = service.findById(id)
             if (findByIdResult is FindByIdResult.Success) {
                 kunde.addAttribute("kunde", findByIdResult.kunde)
             }

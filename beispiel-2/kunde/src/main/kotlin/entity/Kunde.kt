@@ -16,7 +16,6 @@
  */
 package com.acme.kunde.entity
 
-import com.acme.kunde.config.security.CustomUser
 import com.acme.kunde.entity.Kunde.Companion.ID_PATTERN
 import com.acme.kunde.entity.Kunde.Companion.MAX_KATEGORIE
 import com.acme.kunde.entity.Kunde.Companion.MIN_KATEGORIE
@@ -122,10 +121,6 @@ data class Kunde(
     @JsonIgnore
     private val aktualisiert: LocalDateTime? = null,
 ) {
-    @Transient
-    @Suppress("UndocumentedPublicProperty", "DataClassShouldBeImmutable")
-    var user: CustomUser? = null
-
     /**
      * Vergleich mit einem anderen Objekt oder null.
      * @param other Das zu vergleichende Objekt oder null
@@ -153,7 +148,7 @@ data class Kunde(
     override fun toString() = "Kunde(id=$id, version=$version, nachname=$nachname, email=$email, " +
         "kategorie=$kategorie, newsletter=$newsletter, " + "geburtsdatum=$geburtsdatum, umsatz=$umsatz, " +
         "homepage=$homepage, geschlecht=$geschlecht, " + "familienstand=$familienstand, interessen=$interessen, " +
-        "adresse=$adresse, username=$username, erzeugt=$erzeugt, aktualisiert= $aktualisiert, user=$user)"
+        "adresse=$adresse, username=$username, erzeugt=$erzeugt, aktualisiert= $aktualisiert)"
 
     /**
      * Konstante für Kunde-Objekte

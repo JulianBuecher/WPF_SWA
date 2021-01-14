@@ -1,0 +1,28 @@
+# Default values for keycloak.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: acme
+
+replicaCount: 1
+
+port: 8080
+
+name: keycloak
+
+image:
+  pullPolicy: IfNotPresent
+  name: jboss/keycloak
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: 11.0.2
+
+storage: 1Gi
+hostpath: /run/desktop/mnt/host/c/Zimmermann/volumes/keycloak
+admin:
+  name: keycloak
+  password:
+    key: password
+    value: cA==
+
+service:
+  port: 9900

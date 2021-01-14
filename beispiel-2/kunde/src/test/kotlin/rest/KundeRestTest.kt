@@ -20,7 +20,6 @@ package com.acme.kunde.rest
 
 import com.acme.kunde.Router.Companion.apiPath
 import com.acme.kunde.config.Settings.DEV
-import com.acme.kunde.config.security.CustomUser
 import com.acme.kunde.entity.Adresse
 import com.acme.kunde.entity.GeschlechtType.WEIBLICH
 import com.acme.kunde.entity.InteresseType.LESEN
@@ -224,25 +223,6 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
             }
 
             @ParameterizedTest
-            @ValueSource(strings = [ID_NICHT_VORHANDEN])
-            @Order(1300)
-            fun `Suche mit nicht-vorhandener ID und Rolle kunde`(id: String) = runBlocking<Unit> {
-                // arrange
-                val clientKunde = WebClient.builder()
-                    .filter(basicAuthentication(USERNAME_KUNDE, PASSWORD))
-                    .baseUrl(baseUrl)
-                    .build()
-
-                // act
-                val response = clientKunde.get()
-                    .uri(ID_PATH, id)
-                    .awaitExchange()
-
-                // assert
-                assertThat(response.statusCode()).isEqualTo(FORBIDDEN)
-            }
-
-            @ParameterizedTest
             @ValueSource(strings = [ID_INVALID])
             @Order(1300)
             fun `Suche mit syntaktisch ungueltiger ID`(id: String) = runBlocking<Unit> {
@@ -253,29 +233,6 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
 
                 // assert
                 assertThat(response.statusCode()).isEqualTo(NOT_FOUND)
-            }
-
-            @ParameterizedTest
-            @CsvSource("$USERNAME_ADMIN, $PASSWORD_FALSCH, $ID_VORHANDEN")
-            @Order(1400)
-            fun `Suche mit ID, aber falschem Passwort`(
-                username: String,
-                password: String,
-                id: String,
-            ) = runBlocking<Unit> {
-                // arrange
-                val clientFalsch = WebClient.builder()
-                    .filter(basicAuthentication(username, password))
-                    .baseUrl(baseUrl)
-                    .build()
-
-                // act
-                val response = clientFalsch.get()
-                    .uri(ID_PATH, id)
-                    .awaitExchange()
-
-                // assert
-                assertThat(response.statusCode()).isEqualTo(UNAUTHORIZED)
             }
         }
 
@@ -348,8 +305,7 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
         inner class Erzeugen {
             @ParameterizedTest
             @CsvSource(
-                "$NEUER_NACHNAME, $NEUE_EMAIL, $NEUES_GEBURTSDATUM, $CURRENCY_CODE, $NEUE_HOMEPAGE, $NEUE_PLZ, " +
-                    "$NEUER_ORT, $NEUER_USERNAME",
+                "$NEUER_NACHNAME, $NEUE_EMAIL, $NEUES_GEBURTSDATUM, $CURRENCY_CODE, $NEUE_HOMEPAGE, $NEUE_PLZ, $NEUER_ORT"
             )
             @Order(5000)
             fun `Abspeichern eines neuen Kunden`(args: ArgumentsAccessor, softly: SoftAssertions) = runBlocking<Unit> {
@@ -365,12 +321,6 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
                     geschlecht = WEIBLICH,
                     interessen = listOfNotNull(LESEN, REISEN),
                     adresse = Adresse(plz = args.get<String>(5), ort = args.get<String>(6)),
-                )
-                neuerKunde.user = CustomUser(
-                    id = null,
-                    username = args.get<String>(7),
-                    password = "p",
-                    authorities = emptyList(),
                 )
 
                 // act
@@ -442,52 +392,6 @@ class KundeRestTest(@LocalServerPort private val port: Int, ctx: ReactiveWebAppl
                         bodyToFlow<KundeConstraintViolation>()
                             .onEach { violation -> assertThat(violation.message).matches(violationMsgPredicate) }
                             .first() // NoSuchElementException bei leerem Flow
-                    }
-                }
-            }
-
-            @ParameterizedTest
-            @CsvSource(
-                "$NEUER_NACHNAME, $NEUE_EMAIL, 2019-01-30, $CURRENCY_CODE, $NEUE_HOMEPAGE, $NEUE_PLZ, " +
-                    "$NEUER_ORT, $NEUER_USERNAME",
-            )
-            @Order(5200)
-            fun `Abspeichern eines neuen Kunden mit vorhandenem Usernamen`(
-                args: ArgumentsAccessor,
-                softly: SoftAssertions,
-            ) = runBlocking<Unit> {
-                // arrange
-                val neuerKunde = Kunde(
-                    id = null,
-                    nachname = args.get<String>(0),
-                    email = "${args.get<String>(1)}x",
-                    newsletter = true,
-                    geburtsdatum = args.get<LocalDate>(2),
-                    umsatz = Umsatz(betrag = ONE, waehrung = Currency.getInstance(args.get<String>(3))),
-                    homepage = args.get<URL>(4),
-                    geschlecht = WEIBLICH,
-                    interessen = listOfNotNull(LESEN, REISEN),
-                    adresse = Adresse(plz = args.get<String>(5), ort = args.get<String>(6)),
-                )
-                neuerKunde.user = CustomUser(
-                    id = null,
-                    username = args.get<String>(7),
-                    password = "p",
-                    authorities = emptyList(),
-                )
-
-                // act
-                val response = client.post()
-                    .contentType(APPLICATION_JSON)
-                    .bodyValue(neuerKunde)
-                    .awaitExchange()
-
-                // assert
-                with(response) {
-                    with(softly) {
-                        assertThat(statusCode()).isEqualTo(BAD_REQUEST)
-                        val body = awaitBody<String>()
-                        assertThat(body).contains("Username")
                     }
                 }
             }

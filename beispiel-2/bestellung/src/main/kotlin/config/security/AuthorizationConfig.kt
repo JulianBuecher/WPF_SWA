@@ -20,14 +20,26 @@ import com.acme.bestellung.Router.Companion.apiPath
 import com.acme.bestellung.config.security.Rolle.actuator
 import com.acme.bestellung.config.security.Rolle.admin
 import com.acme.bestellung.config.security.Rolle.kunde
+import mu.KotlinLogging
 import org.springframework.boot.actuate.autoconfigure.security.reactive.EndpointRequest
 import org.springframework.context.annotation.Bean
+import org.springframework.core.convert.converter.Converter
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
+import org.springframework.security.authentication.AbstractAuthenticationToken
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
+import reactor.core.publisher.Mono
+import java.util.stream.Collectors
+import kotlin.streams.toList
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
 
 /**
  * Security-Konfiguration.
@@ -35,6 +47,33 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
  * @author [Jürgen Zimmermann](mailto:Juergen.Zimmermann@HS-Karlsruhe.de)
  */
 // https://github.com/spring-projects/spring-security/tree/master/samples
+//interface AuthorizationConfig {
+//    /**
+//     * Bean-Definition, um den Zugriffsschutz an der REST-Schnittstelle zu konfigurieren.
+//     *
+//     * @param http Injiziertes Objekt von `ServerHttpSecurity` als Ausgangspunkt für die Konfiguration.
+//     * @return Objekt von `SecurityWebFilterChain`.
+//     */
+//    @Bean
+//    fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http {
+//        authorizeExchange {
+//            val bestellungIdPath = "$apiPath/*"
+//
+//            authorize(pathMatchers(POST, apiPath), hasRole(kunde))
+//            authorize(pathMatchers(GET, apiPath, bestellungIdPath), hasRole(admin))
+//            authorize(pathMatchers(GET, apiPath), hasRole(admin))
+//
+//            authorize(EndpointRequest.to("health"), permitAll)
+//            authorize(EndpointRequest.toAnyEndpoint(), hasRole(actuator))
+//        }
+//
+//        httpBasic {}
+//        formLogin { disable() }
+//        headers { contentSecurityPolicy { policyDirectives = "default-src 'self'" } }
+//        csrf { disable() }
+//    }
+//}
+@EnableReactiveMethodSecurity
 interface AuthorizationConfig {
     /**
      * Bean-Definition, um den Zugriffsschutz an der REST-Schnittstelle zu konfigurieren.
@@ -45,19 +84,46 @@ interface AuthorizationConfig {
     @Bean
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain = http {
         authorizeExchange {
-            val bestellungIdPath = "$apiPath/*"
-
+            val apiPath = String.format("$apiPath/**")
             authorize(pathMatchers(POST, apiPath), hasRole(kunde))
-            authorize(pathMatchers(GET, apiPath, bestellungIdPath), hasRole(admin))
+            authorize(pathMatchers(GET, apiPath), hasRole(admin))
             authorize(pathMatchers(GET, apiPath), hasRole(admin))
 
             authorize(EndpointRequest.to("health"), permitAll)
-            authorize(EndpointRequest.toAnyEndpoint(), hasRole(actuator))
+            authorize(EndpointRequest.toAnyEndpoint(), permitAll)
         }
-
-        httpBasic {}
+        httpBasic {disable()}
         formLogin { disable() }
-        headers { contentSecurityPolicy { policyDirectives = "default-src 'self'" } }
         csrf { disable() }
+        oauth2ResourceServer {
+            jwt { jwtAuthenticationConverter = grantedAuthoritiesExtractor() }
+        }
+    }
+
+    private fun grantedAuthoritiesExtractor(): Converter<Jwt, out Mono<out AbstractAuthenticationToken>> {
+        val extractor = GrantedAuthoritiesExtractor()
+        return ReactiveJwtAuthenticationConverterAdapter(extractor)
+    }
+
+    class GrantedAuthoritiesExtractor : JwtAuthenticationConverter() {
+        override fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> {
+            val logger = KotlinLogging.logger {}
+
+            // Wir wollen realm access und nicht account
+            val resource = jwt.getClaimAsMap("realm_access")
+
+            val roles: List<String> =
+                if (resource["roles"] == null) listOf() else (resource["roles"] as List<*>).filterIsInstance<String>()
+            println(roles.stream().toList().toString())
+
+            val p = roles.stream()
+                .map { role: String? -> SimpleGrantedAuthority(role?.toUpperCase()) }
+                .collect(Collectors.toList())
+            logger.info { p }
+
+            return roles.stream()
+                .map { role: String? -> SimpleGrantedAuthority(String.format("ROLE_${role?.toUpperCase()}")) }
+                .collect(Collectors.toList())
+        }
     }
 }

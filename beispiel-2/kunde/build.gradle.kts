@@ -167,14 +167,16 @@ repositories {
     //}
     // https://github.com/spring-projects/spring-framework/wiki/Spring-repository-FAQ
     // https://github.com/spring-projects/spring-framework/wiki/Release-Process
-    maven("https://repo.spring.io/libs-milestone") {
+    // https://spring.io/blog/2020/10/29/notice-of-permissions-changes-to-repo-spring-io-fall-and-winter-2020#january-6-2021
+    maven("https://repo.spring.io/milestone") {
         mavenContent { releasesOnly() }
     }
     maven("https://repo.spring.io/release") {
         mavenContent { releasesOnly() }
     }
 
-    //jcenter()
+    // Wird für org.jetbrains.kotinx:kotlinx-html-jvm:0.7.2 benötigt (Dependency von detekt)
+    jcenter()
 
     // Snapshots von Spring Framework, Spring Boot, Spring Data und Spring Security
     //maven("https://repo.spring.io/libs-snapshot") {
@@ -238,7 +240,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-
+    //TODO
+    implementation("org.springframework.security:spring-security-oauth2-client:5.4.1")
+    implementation("org.springframework.security:spring-security-oauth2-resource-server:5.4.1")
+    implementation("org.springframework.security:spring-security-oauth2-jose:5.4.1")
     // https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-kotlin-configuration-properties
     // https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-configuration-metadata.html#configuration-metadata-annotation-processor
     // META-INF\additional-spring-configuration-metadata.json

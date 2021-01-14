@@ -32,7 +32,8 @@ object Versions {
     //val kotlinJvmTarget = org.gradle.api.JavaVersion.VERSION_13.majorVersion
     val kotlinJvmTarget = org.gradle.api.JavaVersion.VERSION_11.majorVersion
 
-    const val buildPackJava = "14.0.2"
+//    const val buildPackJava = "14.0.2"
+    const val buildPackJava = "15.*"
 
     val jibJava = org.gradle.api.JavaVersion.VERSION_14.majorVersion
     //val jibJava = org.gradle.api.JavaVersion.VERSION_11.majorVersion
@@ -91,6 +92,7 @@ object Versions {
     const val jakartaXmlBindApi = "3.0.0-RC3"
     const val junitJupiterBom = "5.7.0-RC1"
     const val kotlinCoroutines = "1.3.9"
+    const val keycloak = "11.0.2"
     //const val mongodb = "4.1.0"
     //const val mongoDriverReactivestreams = mongodb
     //const val reactiveStreams = "1.0.3"
@@ -115,7 +117,7 @@ object Versions {
     //const val ktlintKotlin = "1.3.72"
     const val httpClientKtlint = "4.5.12"
     // https://www.eclemma.org/jacoco : 0.8.6-20200410.013514-49
-	const val jacocoVersion = "0.8.6-SNAPSHOT"
+	const val jacocoVersion = "0.8.6"
     //const val jacocoVersion = "0.8.6"
     const val allure = "2.13.5"
     const val allureCommandline = allure

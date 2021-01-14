@@ -1,0 +1,74 @@
+{{/*Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe*/}}
+
+  {{/*This program is free software: you can redistribute it and/or modify*/}}
+  {{/*it under the terms of the GNU General Public License as published by*/}}
+  {{/*the Free Software Foundation, either version 3 of the License, or*/}}
+  {{/*(at your option) any later version.*/}}
+
+  {{/*This program is distributed in the hope that it will be useful,*/}}
+  {{/*but WITHOUT ANY WARRANTY; without even the implied warranty of*/}}
+  {{/*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the*/}}
+  {{/*GNU General Public License for more details.*/}}
+
+  {{/*You should have received a copy of the GNU General Public License*/}}
+  {{/*along with this program.  If not, see <http://www.gnu.org/licenses/>.*/}}
+
+  {{/* Service wird von StatefulSet referenziert */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.port }}
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    version: {{ .Values.image.tag }}
+    tier: backend
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      version: {{ .Values.image.tag }}
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        version: {{ .Values.image.tag }}
+    spec:
+      containers:
+        - name: {{ .Values.name }}
+          image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+          env:
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-dev
+                  key: {{ .Values.admin.password.key }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-env-dev
+          ports:
+            - containerPort: {{ .Values.port }}
+          volumeMounts:
+            - mountPath: /opt/jboss/keycloak/standalone/data
+              name: keycloak-volume
+      volumes:
+        - name: keycloak-volume
+          persistentVolumeClaim:
+            claimName: keycloak-volume

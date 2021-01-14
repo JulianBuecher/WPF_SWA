@@ -18,9 +18,6 @@
 
 package com.acme.kunde.service
 
-import com.acme.kunde.config.security.CustomUser
-import com.acme.kunde.config.security.CustomUserDetailsService
-import com.acme.kunde.config.security.Rolle
 import com.acme.kunde.entity.Adresse
 import com.acme.kunde.entity.FamilienstandType.LEDIG
 import com.acme.kunde.entity.GeschlechtType.WEIBLICH
@@ -93,7 +90,6 @@ import java.net.URL
 import java.time.LocalDate
 import java.util.Currency
 import java.util.Locale.GERMANY
-import com.acme.kunde.config.security.CreateResult as UserCreateResult
 
 // https://junit.org/junit5/docs/current/user-guide
 // https://assertj.github.io/doc
@@ -113,9 +109,8 @@ class KundeServiceTest {
 
     // ggf. com.ninja-squad:springmockk
     private val validatorFactory = Validation.buildDefaultValidatorFactory()
-    private var userDetailsService = mockk<CustomUserDetailsService>()
     private val mailer = mockk<Mailer>()
-    private val service = KundeService(mongo, validatorFactory, userDetailsService, mailer)
+    private val service = KundeService(mongo, validatorFactory, mailer)
 
     private var findOp = mockk<ReactiveFind<Kunde>>()
     private var insertOp = mockk<ReactiveInsert<Kunde>>()
@@ -126,7 +121,6 @@ class KundeServiceTest {
         clearMocks(
             mongo,
             mongoTemplate,
-            userDetailsService,
             mailer,
             findOp,
             insertOp,
@@ -158,7 +152,7 @@ class KundeServiceTest {
         @Nested
         inner class `Suche anhand der ID` {
             @ParameterizedTest
-            @CsvSource("$ID_VORHANDEN, $NACHNAME, $USERNAME")
+            @CsvSource("$ID_VORHANDEN, $NACHNAME")
             @Order(1000)
             // runBlockingTest {}, damit die Testfunktion nicht vor den Coroutinen (= suspend-Funktionen) beendet wird
             // https://github.com/Kotlin/kotlinx.coroutines/blob/master/kotlinx-coroutines-test/README.md#runblockingtest
@@ -177,7 +171,7 @@ class KundeServiceTest {
                 every { findOp.one() } returns kundeMock.toMono()
 
                 // act
-                val result = service.findById(id, username)
+                val result = service.findById(id)
 
                 // assert
                 assertThat(result is FindByIdResult.Success)
@@ -190,26 +184,15 @@ class KundeServiceTest {
             @Order(1100)
             fun `Suche mit nicht vorhandener ID`(idStr: String) = runBlockingTest {
                 // arrange
-                val username = USERNAME_ADMIN
-                val password = PASSWORD
-                val admin: UserDetails = CustomUser(
-                    id = randomUUID(),
-                    username = username,
-                    password = password,
-                    authorities = listOfNotNull(SimpleGrantedAuthority(Rolle.adminStr)),
-                )
 
                 @Suppress("UNCHECKED_CAST")
-                val adminMono = admin.toMono() as Mono<UserDetails?>
-                every { userDetailsService.findByUsername(username) } returns adminMono
-
                 every { mongo.query<Kunde>() } returns findOp
                 val id = KundeId.fromString(idStr)
                 every { findOp.matching(Kunde::id isEqualTo id) } returns findOp
                 every { findOp.one() } returns Mono.empty()
 
                 // act
-                val result = service.findById(id, username)
+                val result = service.findById(id)
 
                 // assert
                 assertThat(result).isInstanceOf(FindByIdResult.NotFound::class.java)
@@ -373,7 +356,7 @@ class KundeServiceTest {
         @Nested
         inner class Erzeugen {
             @ParameterizedTest
-            @CsvSource("$NACHNAME, $EMAIL, $PLZ, $USERNAME, $PASSWORD")
+            @CsvSource("$NACHNAME, $EMAIL, $PLZ")
             @Order(5000)
             @Disabled("TODO Mocking des Transaktionsrumpfs")
             fun `Neuen Kunden abspeichern`(args: ArgumentsAccessor, softly: SoftAssertions) = runBlockingTest {
@@ -388,13 +371,8 @@ class KundeServiceTest {
                 every { findOp.matching(Kunde::email isEqualTo email) } returns findOp
                 every { findOp.exists() } returns false.toMono()
 
-                val userMock = CustomUser(id = null, username = username, password = password)
-                val userMockCreated = CustomUser(id = randomUUID(), username = username, password = password)
-                val userResult = UserCreateResult.Success(userMockCreated)
-                every { runBlocking { userDetailsService.create(userMock) } } returns userResult
-
                 every { mongo.insert<Kunde>() } returns insertOp
-                val kundeMock = createKundeMock(null, nachname, email, plz, username, password)
+                val kundeMock = createKundeMock(null, nachname, email, plz, password)
                 val kundeResultMock = kundeMock.copy(id = randomUUID())
                 every { insertOp.one(kundeMock) } returns kundeResultMock.toMono()
 
@@ -425,13 +403,10 @@ class KundeServiceTest {
 
                 // act
                 val result = service.create(kundeMock)
-
-                // assert
-                assertThat(result).isInstanceOf(CreateResult.InvalidAccount::class.java)
             }
 
             @ParameterizedTest
-            @CsvSource("$NACHNAME, $EMAIL, $PLZ, $USERNAME, $PASSWORD")
+            @CsvSource("$NACHNAME, $EMAIL, $PLZ")
             @Order(5200)
             fun `Neuer Kunde mit existierender Email`(args: ArgumentsAccessor) =
                 runBlockingTest {
@@ -445,7 +420,7 @@ class KundeServiceTest {
                     every { mongo.query<Kunde>() } returns findOp
                     every { findOp.matching(Kunde::email isEqualTo email) } returns findOp
                     every { findOp.exists() } returns true.toMono()
-                    val kundeMock = createKundeMock(null, nachname, email, plz, username, password)
+                    val kundeMock = createKundeMock(null, nachname, email, plz)
 
                     // act
                     val result = service.create(kundeMock)
@@ -622,18 +597,7 @@ class KundeServiceTest {
     private fun createKundeMock(id: KundeId, nachname: String, email: String) =
         createKundeMock(id, nachname, email, PLZ)
 
-    private fun createKundeMock(id: KundeId?, nachname: String, email: String, plz: String) =
-        createKundeMock(id, nachname, email, plz, null, null)
-
-    @Suppress("LongParameterList", "SameParameterValue")
-    private fun createKundeMock(
-        id: KundeId?,
-        nachname: String,
-        email: String,
-        plz: String,
-        username: String?,
-        password: String?,
-    ): Kunde {
+    private fun createKundeMock(id: KundeId?, nachname: String, email: String, plz: String): Kunde {
         val adresse = Adresse(plz = plz, ort = ORT)
         val kunde = Kunde(
             id = id,
@@ -648,12 +612,7 @@ class KundeServiceTest {
             familienstand = LEDIG,
             interessen = listOfNotNull(LESEN, REISEN),
             adresse = adresse,
-            username = USERNAME,
         )
-        if (username != null && password != null) {
-            val customUser = CustomUser(id = null, username = username, password = password)
-            kunde.user = customUser
-        }
         return kunde
     }
 
@@ -670,9 +629,6 @@ class KundeServiceTest {
         val GEBURTSDATUM: LocalDate = LocalDate.of(2018, 1, 1)
         val WAEHRUNG: Currency = Currency.getInstance(GERMANY)
         const val HOMEPAGE = "https://test.de"
-        const val USERNAME = "test"
-        const val USERNAME_ADMIN = "admin"
-        const val PASSWORD = "p"
         const val VERSION = "0"
         const val VERSION_INVALID = "!?"
         const val VERSION_ALT = "-1"

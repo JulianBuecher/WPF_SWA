@@ -16,7 +16,6 @@
  */
 package com.acme.kunde
 
-import com.acme.kunde.config.security.AuthorizationHandler
 import com.acme.kunde.entity.Kunde
 import com.acme.kunde.html.HtmlHandler
 import com.acme.kunde.rest.KundeFileHandler
@@ -53,8 +52,7 @@ interface Router {
      *      zur Behandlung von Requests mit Binärdateien.
      * @param valuesHandler Objekt der Handler-Klasse [KundeValuesHandler]
      *      zur Behandlung von Requests bzgl. einfachen Werten.
-     * @param authorizationHandler Objekt der Handler-Klasse [AuthorizationHandler]
-     *      zur Behandlung von Requests bzgl. Autorisierung.
+
      * @return Die konfigurierte Router-Function.
      */
     @Bean
@@ -65,7 +63,6 @@ interface Router {
         streamHandler: KundeStreamHandler,
         fileHandler: KundeFileHandler,
         valuesHandler: KundeValuesHandler,
-        authorizationHandler: AuthorizationHandler,
         htmlHandler: HtmlHandler,
     ) = coRouter {
         val idPathPattern = "{$idPathVar:${Kunde.ID_PATTERN}}"
@@ -131,10 +128,6 @@ interface Router {
             GET(detailsPath, htmlHandler::details)
         }
 
-        authPath.nest {
-            GET("/rollen", authorizationHandler::findEigeneRollen)
-        }
-
         // ggf. weitere Routen: z.B. HTML mit ThymeLeaf, Mustache, FreeMarker
     }
         .filter { request, next ->
@@ -175,11 +168,6 @@ interface Router {
          * Pfad für die Detailsseite der HTML-Schnittstelle
          */
         const val detailsPath = "/details"
-
-        /**
-         * Pfad für Authentifizierung und Autorisierung
-         */
-        const val authPath = "$apiPath/auth"
 
         /**
          * Pfad, um Nachnamen abzufragen
