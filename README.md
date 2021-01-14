@@ -2,12 +2,10 @@
 
 ## Table of Contents
 
-- [Repository für das WPF in Softwarearchitektur](#repository-für-das-wpf-in-softwarearchitektur)
-  - [Table of Contents](#table-of-contents)
-  - [Verwendung](#verwendung)
-  - [Resourcen](#resourcen)
-  - [Umsetzung](#umsetzung)
-  - [Weitere Änderungen](#weitere-änderungen)
+- [Verwendung](#verwendung)
+- [Resourcen](#resourcen)
+- [Umsetzung](#umsetzung)
+- [Weitere Änderungen](#weitere-änderungen)
 
 ## Verwendung
 
